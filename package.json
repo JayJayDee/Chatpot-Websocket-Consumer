@@ -1,0 +1,39 @@
+{
+  "name": "chatpot-websocket-consumer",
+  "version": "1.0.0",
+  "description": "chatpot websocket consumer for chatpot services",
+  "main": "index.js",
+  "scripts": {
+    "dev": "CONFIG_FILE=$HOME/chatpot-websocket-consumer-conf.json TS_NODE_FILES=true nodemon --watch ./src -e ts --exec ts-node -- --project ./tsconfig.json ./src/app",
+    "lint": "tslint -t stylish --project ./tsconfig.json",
+    "test": "jest -c jest.config.js",
+    "test:coverage": "jest -c jest.config.js --coverage",
+    "clean": "rimraf coverage dist",
+    "build": "npm run clean && npm run lint && npm run test && tsc -p ./tsconfig.build.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JayJayDee/Chatpot-Websocket-Consumer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JayJayDee/Chatpot-Websocket-Consumer/issues"
+  },
+  "homepage": "https://github.com/JayJayDee/Chatpot-Websocket-Consumer#readme",
+  "devDependencies": {
+    "@types/jest": "^24.0.11",
+    "@types/node": "^11.11.0",
+    "jest": "^24.3.1",
+    "nodemon": "^1.18.10",
+    "rimraf": "^2.6.3",
+    "ts-jest": "^24.0.0",
+    "ts-node": "^8.0.3",
+    "tslib": "^1.9.3",
+    "tslint": "^5.13.1",
+    "typescript": "^3.3.3333"
+  },
+  "dependencies": {
+    "smart-factory": "^1.0.12"
+  }
+}
