@@ -7,6 +7,7 @@ export namespace ConfigModules {
   export const AmqpConfig = 'Config/AmqpConfig';
   export const FcmConfig = 'Config/FcmConfig';
   export const TopicConfig = 'Config/TopicConfig';
+  export const WebsocketConfig = 'Config/WebsocketConfig';
   export const Env = 'Config/Env';
   export const ConfigRules = 'Config/ConfigRules';
 }

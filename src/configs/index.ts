@@ -15,6 +15,9 @@ injectable(ConfigModules.EmptyConfig, [], async (): Promise<ConfigTypes.RootConf
   topic: {
     deviceQueue: null,
     websocketMessageQueue: null
+  },
+  websocket: {
+    port: null
   }
 }));
 
@@ -26,7 +29,8 @@ injectable(ConfigModules.ConfigRules, [],
     { key: 'AMQP_LOGIN', path: ['amqp', 'login']  },
     { key: 'AMQP_PASSWORD', path: ['amqp', 'password'] },
     { key: 'TOPIC_DEVICE_QUEUE', path: ['topic', 'deviceQueue'] },
-    { key: 'TOPIC_WEBSOCKET_MESSAGE_QUEUE', path: ['topic', 'websocketMessageQueue'] }
+    { key: 'TOPIC_WEBSOCKET_MESSAGE_QUEUE', path: ['topic', 'websocketMessageQueue'] },
+    { key: 'WEBSOCKET_PORT', path: ['websocket', 'port'] }
   ]));
 
 injectable(ConfigModules.ConfigSource,
@@ -48,6 +52,10 @@ injectable(ConfigModules.AmqpConfig,
 injectable(ConfigModules.TopicConfig,
   [ConfigModules.RootConfig],
   async (root: ConfigTypes.RootConfig) => root.topic);
+
+injectable(ConfigModules.WebsocketConfig,
+  [ConfigModules.RootConfig],
+  async (root: ConfigTypes.RootConfig) => root.websocket);
 
 injectable(ConfigModules.Env,
   [ConfigModules.ConfigSource],

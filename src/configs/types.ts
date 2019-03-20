@@ -2,6 +2,7 @@ export namespace ConfigTypes {
   export type RootConfig = {
     amqp: AmqpConfig;
     topic: TopicConfig;
+    websocket: WebsocketConfig;
   };
   export type AmqpConfig = {
     host: string;
@@ -21,6 +22,9 @@ export namespace ConfigTypes {
   export type TopicConfig = {
     deviceQueue: string;
     websocketMessageQueue: string;
+  };
+  export type WebsocketConfig = {
+    port: number;
   };
   export type ConfigSource = {[key: string]: any};
   export type ConfigReader = () => Promise<ConfigSource>;
