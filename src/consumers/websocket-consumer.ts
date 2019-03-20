@@ -1,15 +1,14 @@
 import { injectable } from 'smart-factory';
 import { ConsumerModules } from './modules';
 import { ConsumerTypes } from './types';
-
-const name = 'websocket-consumer';
+import { ConfigModules, ConfigTypes } from '../configs';
 
 injectable(ConsumerModules.Consumers.WebsocketConsumer,
-  [],
-  async (): Promise<ConsumerTypes.QueueConsumer> =>
+  [ ConfigModules.TopicConfig ],
+  async (cfg: ConfigTypes.TopicConfig): Promise<ConsumerTypes.QueueConsumer> =>
 
   ({
-    name,
+    name: cfg.websocketMessageQueue,
     consume: async (payload: any) => {
       console.log(payload);
     }
