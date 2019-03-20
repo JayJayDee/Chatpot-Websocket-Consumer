@@ -22,7 +22,10 @@
   },
   "homepage": "https://github.com/JayJayDee/Chatpot-Websocket-Consumer#readme",
   "devDependencies": {
+    "@types/amqplib": "^0.5.11",
     "@types/jest": "^24.0.11",
+    "@types/lodash": "^4.14.123",
+    "@types/moment": "^2.13.0",
     "@types/node": "^11.11.0",
     "jest": "^24.3.1",
     "nodemon": "^1.18.10",
@@ -34,6 +37,9 @@
     "typescript": "^3.3.3333"
   },
   "dependencies": {
+    "amqplib": "^0.5.3",
+    "lodash": "^4.17.11",
+    "moment": "^2.24.0",
     "smart-factory": "^1.0.12"
   }
 }
