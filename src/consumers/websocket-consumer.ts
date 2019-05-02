@@ -13,6 +13,7 @@ injectable(ConsumerModules.Consumers.WebsocketConsumer,
   ({
     name: cfg.websocketMessageQueue,
     consume: async (payload: any) => {
-      console.log(payload);
+      log.debug(`[websocket-consumer] payload received`);
+      log.debug(payload);
     }
   }));

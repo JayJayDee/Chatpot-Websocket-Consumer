@@ -3,6 +3,7 @@ export namespace ConfigTypes {
     amqp: AmqpConfig;
     topic: TopicConfig;
     websocket: WebsocketConfig;
+    kvStorage: KeyValueStorageConfig;
   };
   export type AmqpConfig = {
     host: string;
@@ -26,6 +27,18 @@ export namespace ConfigTypes {
   export type WebsocketConfig = {
     port: number;
   };
+  export type KeyValueStorageConfig = {
+    provider: CacheProvider;
+    redis?: RedisConfig;
+  };
+  export type RedisConfig = {
+    host: string;
+    port: number;
+    password?: string;
+  };
+  export enum CacheProvider {
+    MEMORY = 'MEMORY', REDIS = 'REDIS'
+  }
   export type ConfigSource = {[key: string]: any};
   export type ConfigReader = () => Promise<ConfigSource>;
   export type ConfigParser = (src: ConfigSource, rules: ConfigRule[]) => RootConfig;

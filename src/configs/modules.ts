@@ -8,6 +8,7 @@ export namespace ConfigModules {
   export const FcmConfig = 'Config/FcmConfig';
   export const TopicConfig = 'Config/TopicConfig';
   export const WebsocketConfig = 'Config/WebsocketConfig';
+  export const KeyValueStorageConfig = 'Config/KeyValueStorageConfig';
   export const Env = 'Config/Env';
   export const ConfigRules = 'Config/ConfigRules';
 }
