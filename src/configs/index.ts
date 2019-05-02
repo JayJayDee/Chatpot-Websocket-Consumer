@@ -18,6 +18,10 @@ injectable(ConfigModules.EmptyConfig, [], async (): Promise<ConfigTypes.RootConf
   },
   websocket: {
     port: null
+  },
+  kvStorage: {
+    provider: null,
+    redis: null
   }
 }));
 
@@ -30,7 +34,11 @@ injectable(ConfigModules.ConfigRules, [],
     { key: 'AMQP_PASSWORD', path: ['amqp', 'password'] },
     { key: 'TOPIC_DEVICE_QUEUE', path: ['topic', 'deviceQueue'] },
     { key: 'TOPIC_WEBSOCKET_MESSAGE_QUEUE', path: ['topic', 'websocketMessageQueue'] },
-    { key: 'WEBSOCKET_PORT', path: ['websocket', 'port'] }
+    { key: 'WEBSOCKET_PORT', path: ['websocket', 'port'] },
+    { key: 'KV_STORAGE_PROVIDER', path: ['kvStorage', 'provider'], defaultValue: 'MEMORY' },
+    { key: 'KV_STORAGE_REDIS_HOST', path: ['kvStorage', 'redis', 'host'], defaultValue: null },
+    { key: 'KV_STORAGE_REDIS_PORT', path: ['kvStorage', 'redis', 'port'], defaultValue: null },
+    { key: 'KV_STORAGE_REDIS_PASSWORD', path: ['kvStorage', 'redis', 'password'], defaultValue: null }
   ]));
 
 injectable(ConfigModules.ConfigSource,
@@ -56,6 +64,10 @@ injectable(ConfigModules.TopicConfig,
 injectable(ConfigModules.WebsocketConfig,
   [ConfigModules.RootConfig],
   async (root: ConfigTypes.RootConfig) => root.websocket);
+
+injectable(ConfigModules.KeyValueStorageConfig,
+  [ConfigModules.RootConfig],
+  async (root: ConfigTypes.RootConfig) => root.kvStorage);
 
 injectable(ConfigModules.Env,
   [ConfigModules.ConfigSource],
