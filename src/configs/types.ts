@@ -24,8 +24,13 @@ export namespace ConfigTypes {
     deviceQueue: string;
     websocketMessageQueue: string;
   };
+  export enum WebsocketAdapter {
+    MEMORY = 'MEMEORY', REDIS = 'REDIS'
+  }
   export type WebsocketConfig = {
     port: number;
+    adapter: WebsocketAdapter;
+    redis?: RedisConfig;
   };
   export type KeyValueStorageConfig = {
     provider: CacheProvider;
