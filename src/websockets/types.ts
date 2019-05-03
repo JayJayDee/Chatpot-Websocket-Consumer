@@ -10,4 +10,12 @@ export namespace WebsocketTypes {
 
   export type WebsocketInstantiator = () => Promise<WebsocketWrap>;
   export type WebsocketRunner = () => void;
+
+  export type NodeStatus = {
+    publicHost: string;
+    privateHost: string;
+    port: number;
+    numClient: number;
+  };
+  export type NodeStatusHandler = (status: NodeStatus) => Promise<void>;
 }
