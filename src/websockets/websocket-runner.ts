@@ -9,9 +9,11 @@ const tag = '[websocket]';
 injectable(WebsocketModules.WebsocketRunner,
   [ LoggerModules.Logger,
     ConfigModules.WebsocketConfig,
+    ConfigModules.HostConfig,
     WebsocketModules.WebsocketWrap ],
   async (log: LoggerTypes.Logger,
     cfg: ConfigTypes.WebsocketConfig,
+    hostCfg: ConfigTypes.HostConfig,
     ws: WebsocketTypes.WebsocketWrap) =>
 
     () => {
@@ -20,6 +22,7 @@ injectable(WebsocketModules.WebsocketRunner,
       register(ws);
       ws.listen(cfg.port);
       log.debug(`${tag} websocket server started, port:${cfg.port}`);
+      log.debug(`${tag} websocket public host: ${hostCfg.websocket}`);
     });
 
 const eventRegisterer =
