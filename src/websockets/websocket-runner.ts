@@ -3,6 +3,7 @@ import { WebsocketModules } from './modules';
 import { ConfigModules, ConfigTypes } from '../configs';
 import { LoggerModules, LoggerTypes } from '../loggers';
 import { WebsocketTypes } from './types';
+import { NodesInspectorModules, NodesInspectorTypes } from '../nodes-inspector';
 
 const tag = '[websocket]';
 
@@ -10,11 +11,13 @@ injectable(WebsocketModules.WebsocketRunner,
   [ LoggerModules.Logger,
     ConfigModules.WebsocketConfig,
     ConfigModules.HostConfig,
-    WebsocketModules.WebsocketWrap ],
+    WebsocketModules.WebsocketWrap,
+    NodesInspectorModules.ReportAlive ],
   async (log: LoggerTypes.Logger,
     cfg: ConfigTypes.WebsocketConfig,
     hostCfg: ConfigTypes.HostConfig,
-    ws: WebsocketTypes.WebsocketWrap) =>
+    ws: WebsocketTypes.WebsocketWrap,
+    reportAlive: NodesInspectorTypes.ReportAlive) =>
 
     () => {
       const register = eventRegisterer(log);
