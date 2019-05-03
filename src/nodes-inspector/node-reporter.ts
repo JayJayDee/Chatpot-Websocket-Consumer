@@ -13,7 +13,9 @@ injectable(NodesInspectorModules.ReportAlive,
     kvSet: KeyValueStorageTypes.Set): Promise<NodesInspectorTypes.ReportAlive> =>
 
     async (status) => {
-      // TODO: to be implemented
+      const key = `${status.privateHost}:${status.port}`;
+      await kvPush('inspector_nodes', key, 100);
+      await kvSet(key, status);
     });
 
 
