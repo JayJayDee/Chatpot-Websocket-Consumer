@@ -33,5 +33,8 @@ const eventRegisterer =
         socket.on('disconnect', () => {
           log.debug(`${tag} disconnected, id=${socket.id}`);
         });
+        socket.on('test', (payload) => {
+          log.debug(`${tag} test topic published. ${payload}`);
+        });
       });
     };
