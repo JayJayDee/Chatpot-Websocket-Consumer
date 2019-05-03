@@ -17,7 +17,9 @@ injectable(ConfigModules.EmptyConfig, [], async (): Promise<ConfigTypes.RootConf
     websocketMessageQueue: null
   },
   websocket: {
-    port: null
+    port: null,
+    adapter: null,
+    redis: null
   },
   kvStorage: {
     provider: null,
@@ -34,11 +36,15 @@ injectable(ConfigModules.ConfigRules, [],
     { key: 'AMQP_PASSWORD', path: ['amqp', 'password'] },
     { key: 'TOPIC_DEVICE_QUEUE', path: ['topic', 'deviceQueue'] },
     { key: 'TOPIC_WEBSOCKET_MESSAGE_QUEUE', path: ['topic', 'websocketMessageQueue'] },
-    { key: 'WEBSOCKET_PORT', path: ['websocket', 'port'] },
     { key: 'KV_STORAGE_PROVIDER', path: ['kvStorage', 'provider'], defaultValue: 'MEMORY' },
     { key: 'KV_STORAGE_REDIS_HOST', path: ['kvStorage', 'redis', 'host'], defaultValue: null },
     { key: 'KV_STORAGE_REDIS_PORT', path: ['kvStorage', 'redis', 'port'], defaultValue: null },
-    { key: 'KV_STORAGE_REDIS_PASSWORD', path: ['kvStorage', 'redis', 'password'], defaultValue: null }
+    { key: 'KV_STORAGE_REDIS_PASSWORD', path: ['kvStorage', 'redis', 'password'], defaultValue: null },
+    { key: 'WEBSOCKET_PORT', path: ['websocket', 'port'] },
+    { key: 'WEBSOCKET_ADAPTER', path: ['websocket', 'adapter'], defaultValue: 'MEMORY' },
+    { key: 'WEBSOCKET_REDIS_HOST', path: ['websocket', 'redis', 'host'], defaultValue: null },
+    { key: 'WEBSOCKET_REDIS_PORT', path: ['websocket', 'redis', 'port'], defaultValue: null },
+    { key: 'WEBSOCKET_REDIS_PASSWORD', path: ['websocket', 'redis', 'password'], defaultValue: null },
   ]));
 
 injectable(ConfigModules.ConfigSource,
