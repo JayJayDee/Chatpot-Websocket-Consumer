@@ -4,6 +4,7 @@ export namespace ConfigTypes {
     topic: TopicConfig;
     websocket: WebsocketConfig;
     kvStorage: KeyValueStorageConfig;
+    host: HostConfig;
   };
   export type AmqpConfig = {
     host: string;
@@ -40,6 +41,9 @@ export namespace ConfigTypes {
     host: string;
     port: number;
     password?: string;
+  };
+  export type HostConfig = {
+    websocket: string;
   };
   export enum CacheProvider {
     MEMORY = 'MEMORY', REDIS = 'REDIS'
