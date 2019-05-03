@@ -20,7 +20,9 @@ const initRedisDriver =
         range: redisRange(client),
         del: redisDel(client),
         length: redisLength(client),
-        getLasts: redisGetLasts(client)
+        getLasts: redisGetLasts(client),
+        publish: redisPublish(client),
+        subscribe: redisSubscribe(client)
       };
     };
 export default initRedisDriver;
@@ -133,4 +135,16 @@ const redisLength = (client: RedisClient): KeyValueStorageTypes.Length =>
           resolve(resp);
         });
       });
+    });
+
+const redisPublish = (client: RedisClient): KeyValueStorageTypes.Publish =>
+  (channel, payload) =>
+    new Promise((resolve, reject) => {
+
+    });
+
+const redisSubscribe = (client: RedisClient): KeyValueStorageTypes.Subscribe =>
+  (channel, callback) =>
+    new Promise((resolve, reject) => {
+
     });

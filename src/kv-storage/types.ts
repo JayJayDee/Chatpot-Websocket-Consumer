@@ -6,6 +6,9 @@ export namespace KeyValueStorageTypes {
   export type Del = (key: string) => Promise<void>;
   export type Length = (key: string) => Promise<number>;
   export type GetLasts = (keys: string[]) => Promise<{[key: string]: any}>;
+  export type Publish = (channel: string, message: string) => Promise<void>;
+  export type Subscribe = (channel: string, callback: (payload: any) => void) => Promise<void>;
+
 
   export type StorageOperations = {
     get: Get;
@@ -15,6 +18,8 @@ export namespace KeyValueStorageTypes {
     del: Del;
     length: Length;
     getLasts: GetLasts;
+    subscribe: Subscribe;
+    publish: Publish;
   };
 
   export type Helper = (key: string, fetcher: () => Promise<any>) => Promise<any>;

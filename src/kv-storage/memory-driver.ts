@@ -18,7 +18,9 @@ const initMemoryDriver = () =>
       range: memoryRange(storage),
       del: memoryDel(storage),
       length: memoryLength(storage),
-      getLasts: memoryGetLasts(storage, expset)
+      getLasts: memoryGetLasts(storage, expset),
+      publish: memoryPublish(storage),
+      subscribe: memorySubscribe(storage)
     };
   };
 export default initMemoryDriver;
@@ -104,4 +106,15 @@ const memoryLength =
       if (!arr) throw new KvStorageKeyNotfoundError(`key:${key} not found`);
       if (!isArray(arr)) throw new KvStorageInvalidOpsError(`key:${key} was not an array`);
       return arr.length;
+    };
+
+const memoryPublish =
+  (storage: Storage): KeyValueStorageTypes.Publish =>
+    async (channel, payload) => {
+    };
+
+const memorySubscribe =
+  (storage: Storage): KeyValueStorageTypes.Subscribe =>
+    async (channel, callback) => {
+
     };
