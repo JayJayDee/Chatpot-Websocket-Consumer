@@ -1,41 +1,34 @@
 import { injectable } from 'smart-factory';
-import { createClient } from 'redis';
-const io = require('socket.io');
-const redisAdapter = require('socket.io-redis');
-
 import { WebsocketModules } from './modules';
 import { ConfigModules, ConfigTypes } from '../configs';
 import { LoggerModules, LoggerTypes } from '../loggers';
-import { RedisConnectionError } from './errors';
+import { WebsocketTypes } from './types';
 
 const tag = '[websocket]';
 
 injectable(WebsocketModules.WebsocketRunner,
   [ LoggerModules.Logger,
-    ConfigModules.WebsocketConfig ],
+    ConfigModules.WebsocketConfig,
+    WebsocketModules.WebsocketWrap ],
   async (log: LoggerTypes.Logger,
-    cfg: ConfigTypes.WebsocketConfig) =>
+    cfg: ConfigTypes.WebsocketConfig,
+    ws: WebsocketTypes.WebsocketWrap) =>
 
-    async () => {
-      const ws = io();
+    () => {
+      const register = eventRegisterer(log);
 
-      if (cfg.adapter === ConfigTypes.WebsocketAdapter.REDIS) {
-        log.debug(`${tag} using socket.io-redis adapter..`);
-        await inspectRedisConnection(cfg.redis);
-        ws.adapter(redisAdapter(cfg.redis));
-        log.debug(`${tag} socket.io-redis adapter created`);
-      }
-      io.listen(cfg.port);
-      log.debug(`${tag} socket.io server started, port:${cfg.port}`);
+      register(ws);
+      ws.listen(cfg.port);
+      log.debug(`${tag} websocket server started, port:${cfg.port}`);
     });
 
-const inspectRedisConnection =
-  (cfg: ConfigTypes.RedisConfig) =>
-    new Promise((resolve, reject) => {
-      if (cfg.password === null) delete cfg.password;
-      const client = createClient(cfg);
-      client.get('1', (err, reply) => {
-        if (err) return reject(new RedisConnectionError(`connection failed: ${cfg.host}`));
-        resolve();
+const eventRegisterer =
+  (log: LoggerTypes.Logger) =>
+    (ws: WebsocketTypes.WebsocketWrap) => {
+      ws.on('connection', (socket) => {
+        log.debug(`${tag} connected, id=${socket.id}`);
+        socket.on('disconnect', () => {
+          log.debug(`${tag} disconnected, id=${socket.id}`);
+        });
       });
-    });
+    };
