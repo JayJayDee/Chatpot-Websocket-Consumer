@@ -19,11 +19,14 @@ injectable(WebsocketModules.WebsocketRunner,
     ws: WebsocketTypes.WebsocketWrap,
     reportAlive: NodesInspectorTypes.ReportAlive) =>
 
-    () => {
+    async () => {
       const register = eventRegisterer(log);
 
-      register(ws);
+      register(ws); // TEST-PURPOSE
+
       ws.listen(cfg.port);
+      await reportAlive();
+
       log.debug(`${tag} websocket server started, port:${cfg.port}`);
       log.debug(`${tag} websocket public host: ${hostCfg.websocket}`);
     });
