@@ -74,7 +74,12 @@ const redisGet = (client: RedisClient): KeyValueStorageTypes.Get =>
 const redisSet = (client: RedisClient): KeyValueStorageTypes.Set =>
   (key: string, value: any, expires?: number) =>
     new Promise((resolve, reject) => {
-      client.set(key, value, (err: Error, reply: string) => {
+      let targetValue = value;
+      if (isObject(targetValue) === true) {
+        targetValue = JSON.stringify(targetValue);
+      }
+
+      client.set(key, targetValue, (err: Error, reply: string) => {
         if (err) return reject(err);
         if (!expires) return resolve();
         client.expire(key, expires, (err, reply) => {
