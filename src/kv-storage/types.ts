@@ -1,3 +1,5 @@
+import { RedisClient } from 'redis';
+
 export namespace KeyValueStorageTypes {
   export type Get = (key: string) => Promise<any>;
   export type Set = (key: string, value: any, expires?: number) => Promise<void>;
@@ -23,4 +25,5 @@ export namespace KeyValueStorageTypes {
   };
 
   export type Helper = (key: string, fetcher: () => Promise<any>) => Promise<any>;
+  export type GetRedisClient = () => Promise<RedisClient>;
 }
