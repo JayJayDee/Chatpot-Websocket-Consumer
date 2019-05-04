@@ -6,7 +6,7 @@ import { LoggerModules, LoggerTypes } from '../loggers';
 import { NodesInspectorTypes } from './types';
 import { ConfigModules, ConfigTypes } from '../configs';
 
-const tag = '[node-reporter]';
+const tag = '[ws-node-reporter]';
 const keyPrefix = 'WS_NODE_';
 
 injectable(NodesInspectorModules.ReportAlive,
@@ -37,8 +37,9 @@ injectable(NodesInspectorModules.ReportAlive,
 
 
 injectable(NodesInspectorModules.PickHealthyNode,
-  [],
-  async (): Promise<NodesInspectorTypes.PickHealthyNode> =>
+  [ KeyValueStorageModules.GetRedisClient ],
+  async (getRedisClient: KeyValueStorageTypes.GetRedisClient): Promise<NodesInspectorTypes.PickHealthyNode> =>
+
     async () => {
       // TODO: to be implemented.
       return null;

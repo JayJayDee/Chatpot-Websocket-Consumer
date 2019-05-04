@@ -8,6 +8,8 @@ import { LoggerModules, LoggerTypes } from '../loggers';
 
 const tag = '[kv-storage-redis]';
 
+let redisClient: RedisClient = null;
+
 injectable(KeyValueStorageModules.GetRedisClient,
   [ LoggerModules.Logger,
     ConfigModules.KeyValueStorageConfig ],
@@ -17,15 +19,16 @@ injectable(KeyValueStorageModules.GetRedisClient,
     () =>
       new Promise((resolve, reject) => {
         if (cfg.provider !== ConfigTypes.CacheProvider.REDIS) return resolve(null);
+        if (redisClient !== null) return resolve(redisClient);
 
         if (!cfg.redis.password) delete cfg.redis.password;
-        const client: RedisClient = createClient(cfg.redis);
+        redisClient = createClient(cfg.redis);
 
         log.info(`${tag} establishing redis connection ...`);
 
-        client.get('1', (err, reply) => {
+        redisClient.get('1', (err, reply) => {
           if (err) return reject(new RedisConnectionError(err.message));
           log.info(`${tag} redis connection established`);
-          resolve(client);
+          resolve(redisClient);
         });
       }));
