@@ -7,4 +7,6 @@ export namespace KeyValueStorageModules {
   export const Del = 'KvStorage/Del';
   export const Length = 'KvStorage/Length';
   export const GetLasts = 'KvStorage/GetLasts';
+
+  export const GetRedisClient = 'KvStorage/GetRedisClient';
 }

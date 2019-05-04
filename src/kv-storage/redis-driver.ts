@@ -1,18 +1,12 @@
 import { isArray, isObject } from 'util';
-import { createClient, RedisClient } from 'redis';
+import { RedisClient } from 'redis';
 import { KeyValueStorageTypes } from './types';
 import { ConfigTypes } from '../configs';
-import { RedisConnectionError } from './errors';
 import { LoggerTypes } from '../loggers';
 
 const initRedisDriver =
   (cfg: ConfigTypes.RedisConfig, log: LoggerTypes.Logger) =>
-    async (): Promise<KeyValueStorageTypes.StorageOperations> => {
-      log.info('[kv-storage] establishing redis connection ...');
-      if (!cfg.password) delete cfg.password;
-      const client: RedisClient = createClient(cfg);
-      await inspectConnection(client);
-      log.info('[kv-storage] redis connection established');
+    async (client: RedisClient): Promise<KeyValueStorageTypes.StorageOperations> => {
       return {
         get: redisGet(client),
         set: redisSet(client),
@@ -26,14 +20,6 @@ const initRedisDriver =
       };
     };
 export default initRedisDriver;
-
-const inspectConnection = (client: RedisClient): Promise<void> =>
-  new Promise((resolve, reject) => {
-    client.get('1', (err: Error, reply: string) => {
-      if (err) return reject(new RedisConnectionError(err.message));
-      resolve();
-    });
-  });
 
 const redisGetLasts = (client: RedisClient): KeyValueStorageTypes.GetLasts =>
   (keys: string[]) =>

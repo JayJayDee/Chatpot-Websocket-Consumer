@@ -6,22 +6,31 @@ import { ConfigTypes, ConfigModules } from '../configs';
 import memoryCacheFactory from './memory-driver';
 import redisCacheFactory from './redis-driver';
 
-export const initCache =
-  async (cfg: ConfigTypes.KeyValueStorageConfig, logger: LoggerTypes.Logger): Promise<KeyValueStorageTypes.StorageOperations> => {
-    let cacheOps: KeyValueStorageTypes.StorageOperations = null;
-    const initMemory = memoryCacheFactory();
-    const initRedis = redisCacheFactory(cfg.redis, logger);
+const tag = '[kv-storage]';
 
-    if (cfg.provider === ConfigTypes.CacheProvider.MEMORY) {
-      cacheOps = await initMemory(logger);
-    } else if (cfg.provider === ConfigTypes.CacheProvider.REDIS) {
-      cacheOps = await initRedis();
-    }
-    return cacheOps;
-  };
+export const initCache =
+  async (cfg: ConfigTypes.KeyValueStorageConfig,
+    logger: LoggerTypes.Logger,
+    getRedisConnection: KeyValueStorageTypes.GetRedisClient): Promise<KeyValueStorageTypes.StorageOperations> => {
+      let cacheOps: KeyValueStorageTypes.StorageOperations = null;
+      const initMemory = memoryCacheFactory();
+      const initRedis = redisCacheFactory(cfg.redis, logger);
+
+      if (cfg.provider === ConfigTypes.CacheProvider.MEMORY) {
+        logger.debug(`${tag} using in-memory driver..`);
+        cacheOps = await initMemory(logger);
+      } else if (cfg.provider === ConfigTypes.CacheProvider.REDIS) {
+        logger.debug(`${tag} using redis driver..`);
+        const client = await getRedisConnection();
+        cacheOps = await initRedis(client);
+      }
+      return cacheOps;
+    };
 
 injectable(KeyValueStorageModules.Operations,
-  [ ConfigModules.KeyValueStorageConfig, LoggerModules.Logger ],
+  [ ConfigModules.KeyValueStorageConfig,
+    LoggerModules.Logger,
+    KeyValueStorageModules.GetRedisClient ],
   initCache);
 
 injectable(KeyValueStorageModules.Get,

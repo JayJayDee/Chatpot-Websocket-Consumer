@@ -10,7 +10,6 @@ const initMemoryDriver = () =>
   async (log: LoggerTypes.Logger): Promise<KeyValueStorageTypes.StorageOperations> => {
     const storage: Storage = {};
     const expset: ExpireSet = {};
-    log.info('[kv-storage] using in-memory storage..');
     return {
       get: memoryGet(storage, expset),
       set: memorySet(storage, expset),
