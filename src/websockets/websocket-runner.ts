@@ -8,6 +8,11 @@ import { Socket } from 'socket.io';
 
 const tag = '[websocket]';
 
+type ErrorPayload = {
+  code: string;
+  message: string;
+};
+
 injectable(WebsocketModules.WebsocketRunner,
   [ LoggerModules.Logger,
     ConfigModules.WebsocketConfig,
@@ -38,11 +43,13 @@ const eventRegisterer =
       const onConnect = connectionHandler(log);
       const onDisconnect = disconnectionHandler(log);
       const onJoin = joinHandler(log);
+      const onPublish = publishHandler(log);
 
       ws.on('connection', (socket) => {
         onConnect(socket);
         socket.on('disconnect', () => onDisconnect(socket));
         socket.on('join', (payload: any) => onJoin(socket, payload));
+        socket.on('publish', (payload: any) => onPublish(socket, payload));
       });
     };
 
@@ -59,4 +66,20 @@ const disconnectionHandler = (log: LoggerTypes.Logger) =>
 const joinHandler = (log: LoggerTypes.Logger) =>
   (socket: Socket, payload: any) => {
     log.debug(`${tag} join requested, id=${socket.id}`);
+
+    if (!payload.token) {
+      emitError(socket, {
+        code: 'INVALID_PARAM',
+        message: 'payload with join request must have token'
+      });
+    }
+    // TODO: to be implemented
   };
+
+const publishHandler = (log: LoggerTypes.Logger) =>
+  (socket: Socket, payload: any) => {
+    // TODO: to be implemented
+  };
+
+const emitError = (socket: Socket, payload: ErrorPayload) =>
+  socket.emit('server_error', payload);
