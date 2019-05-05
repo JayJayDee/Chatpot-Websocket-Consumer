@@ -10,6 +10,7 @@ export namespace ConfigModules {
   export const WebsocketConfig = 'Config/WebsocketConfig';
   export const KeyValueStorageConfig = 'Config/KeyValueStorageConfig';
   export const HostConfig = 'Config/Host';
+  export const HttpConfig = 'Config/Http';
 
   export const Env = 'Config/Env';
   export const ConfigRules = 'Config/ConfigRules';
