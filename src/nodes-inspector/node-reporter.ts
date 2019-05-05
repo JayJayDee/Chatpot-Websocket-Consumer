@@ -1,13 +1,23 @@
 import { injectable } from 'smart-factory';
 import { address } from 'ip';
+import { uniq, minBy } from 'lodash';
 import { NodesInspectorModules } from './modules';
 import { KeyValueStorageModules, KeyValueStorageTypes } from '../kv-storage';
 import { LoggerModules, LoggerTypes } from '../loggers';
 import { NodesInspectorTypes } from './types';
 import { ConfigModules, ConfigTypes } from '../configs';
+import { RedisClient } from 'redis';
+import { BaseLogicError } from '../errors';
 
 const tag = '[ws-node-reporter]';
 const keyPrefix = 'WS_NODE_';
+const listKey = 'WS_NODES';
+
+class WebsocketUnavailableError extends BaseLogicError {
+  constructor() {
+    super('WEBSOCKET_UNAVAILABLE', 'there is no available websocket node');
+  }
+}
 
 injectable(NodesInspectorModules.ReportAlive,
   [ LoggerModules.Logger,
@@ -30,7 +40,7 @@ injectable(NodesInspectorModules.ReportAlive,
       };
 
       const key = `${keyPrefix}${status.privateHost}:${status.port}`;
-      await kvPush('WS_NODES', key, 100);
+      await kvPush(listKey, key, 100);
       await kvSet(key, status);
       log.debug(`${tag} reported as a new websocket node`);
     });
@@ -43,7 +53,32 @@ injectable(NodesInspectorModules.PickHealthyNode,
     getRedisClient: KeyValueStorageTypes.GetRedisClient): Promise<NodesInspectorTypes.PickHealthyNode> =>
 
     async () => {
-      log.debug(`${tag} picking a health ws-node..`);
-      // TODO: to be implemented.
-      return null;
+      const client = await getRedisClient();
+      const statuses = await getAllNodeStatuses(client);
+      if (statuses.length === 0) throw new WebsocketUnavailableError();
+      const node = minBy(statuses, (s) => s.numClient);
+      return node;
+    });
+
+
+const getAllNodeStatuses =
+  (client: RedisClient): Promise<NodesInspectorTypes.NodeStatus[]> =>
+    new Promise((resolve, reject) => {
+      client.lrange(listKey, 0, 100, (err, replies: any[]) => {
+        if (err) return reject(err);
+        const multi = client.multi();
+        uniq(replies).forEach((r) => multi.get(r));
+        multi.exec((err, datas) => {
+          if (err) return reject(err);
+          const parsed = datas
+            .map((d) => JSON.parse(d))
+            .map((elem) => ({
+              publicHost: elem.publicHost,
+              privateHost: elem.privateHost,
+              port: elem.port,
+              numClient: elem.numClient
+            }));
+          resolve(parsed);
+        });
+      });
     });
