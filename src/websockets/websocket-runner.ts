@@ -36,10 +36,14 @@ const eventRegisterer =
     (ws: WebsocketTypes.WebsocketWrap) => {
       ws.on('connection', (socket) => {
         log.debug(`${tag} connected, id=${socket.id}`);
+        socket.join('test-room');
+
         socket.on('disconnect', () => {
           log.debug(`${tag} disconnected, id=${socket.id}`);
         });
         socket.on('test', (payload) => {
+          socket.to('test-room').emit('test', payload);
+          socket.emit('test', payload);
           log.debug(`${tag} test topic published. ${payload}`);
         });
       });
