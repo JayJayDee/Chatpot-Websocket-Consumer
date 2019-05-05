@@ -18,30 +18,21 @@ injectable(WebsocketModules.WebsocketRunner,
     ConfigModules.WebsocketConfig,
     ConfigModules.HostConfig,
     WebsocketModules.WebsocketWrap,
-    NodesInspectorModules.ReportAlive ],
+    NodesInspectorModules.ReportAlive,
+    NodesInspectorModules.UpdateReport ],
   async (log: LoggerTypes.Logger,
     cfg: ConfigTypes.WebsocketConfig,
     hostCfg: ConfigTypes.HostConfig,
     ws: WebsocketTypes.WebsocketWrap,
-    reportAlive: NodesInspectorTypes.ReportAlive) =>
+    reportAlive: NodesInspectorTypes.ReportAlive,
+    updateReport: NodesInspectorTypes.UpdateReport) =>
 
     async () => {
-      const register = eventRegisterer(log);
-
-      register(ws); // TEST-PURPOSE
-
       ws.listen(cfg.port);
       await reportAlive();
 
-      log.debug(`${tag} websocket server started, port:${cfg.port}`);
-      log.debug(`${tag} websocket public host: ${hostCfg.websocket}`);
-    });
-
-const eventRegisterer =
-  (log: LoggerTypes.Logger) =>
-    (ws: WebsocketTypes.WebsocketWrap) => {
-      const onConnect = connectionHandler(log);
-      const onDisconnect = disconnectionHandler(log);
+      const onConnect = connectionHandler(log, updateReport, ws);
+      const onDisconnect = disconnectionHandler(log, updateReport, ws);
       const onJoin = joinHandler(log);
       const onPublish = publishHandler(log);
 
@@ -51,17 +42,42 @@ const eventRegisterer =
         socket.on('join', (payload: any) => onJoin(socket, payload));
         socket.on('publish', (payload: any) => onPublish(socket, payload));
       });
-    };
 
-const connectionHandler = (log: LoggerTypes.Logger) =>
-  (socket: Socket) => {
-    log.debug(`${tag} connected, id=${socket.id}`);
-  };
+      log.debug(`${tag} websocket server started, port:${cfg.port}`);
+      log.debug(`${tag} websocket public host: ${hostCfg.websocket}`);
+    });
 
-const disconnectionHandler = (log: LoggerTypes.Logger) =>
-  (socket: Socket) => {
-    log.debug(`${tag} disconnected, id=${socket.id}`);
-  };
+const connectionHandler =
+  (log: LoggerTypes.Logger,
+    updateReport: NodesInspectorTypes.UpdateReport,
+    ws: WebsocketTypes.WebsocketWrap) =>
+      (socket: Socket) => {
+        ws.clients((err, clients) => {
+          if (err) {
+            log.error(err);
+            return;
+          }
+          const numClient = clients.length;
+          updateReport(numClient);
+        });
+        log.debug(`${tag} connected, id=${socket.id}`);
+      };
+
+const disconnectionHandler =
+  (log: LoggerTypes.Logger,
+    updateReport: NodesInspectorTypes.UpdateReport,
+    ws: WebsocketTypes.WebsocketWrap) =>
+      (socket: Socket) => {
+        ws.clients((err, clients) => {
+          if (err) {
+            log.error(err);
+            return;
+          }
+          const numClient = clients.length;
+          updateReport(numClient);
+        });
+        log.debug(`${tag} disconnected, id=${socket.id}`);
+      };
 
 const joinHandler = (log: LoggerTypes.Logger) =>
   (socket: Socket, payload: any) => {

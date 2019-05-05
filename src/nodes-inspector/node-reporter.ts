@@ -19,6 +19,13 @@ class WebsocketUnavailableError extends BaseLogicError {
   }
 }
 
+let privAddr: string = null;
+const privateAddress = () => {
+  if (privAddr) return privAddr;
+  privAddr = address();
+  return privAddr;
+};
+
 injectable(NodesInspectorModules.ReportAlive,
   [ LoggerModules.Logger,
     KeyValueStorageModules.GetRedisClient,
@@ -32,7 +39,7 @@ injectable(NodesInspectorModules.ReportAlive,
     async () => {
       const status: NodesInspectorTypes.NodeStatus = {
         publicHost: hostCfg.websocket,
-        privateHost: address(),
+        privateHost: privateAddress(),
         port: wsCfg.port,
         numClient: 0
       };
@@ -40,6 +47,28 @@ injectable(NodesInspectorModules.ReportAlive,
       await writeAlive(client, status);
 
       log.debug(`${tag} reported as a new websocket node`);
+    });
+
+
+injectable(NodesInspectorModules.UpdateReport,
+  [ LoggerModules.Logger,
+    KeyValueStorageModules.Set,
+    ConfigModules.HostConfig,
+    ConfigModules.WebsocketConfig ],
+  async (log: LoggerTypes.Logger,
+    set: KeyValueStorageTypes.Set,
+    hostCfg: ConfigTypes.HostConfig,
+    wsCfg: ConfigTypes.WebsocketConfig): Promise<NodesInspectorTypes.UpdateReport> =>
+
+    async (numClient) => {
+      const status: NodesInspectorTypes.NodeStatus = {
+        publicHost: hostCfg.websocket,
+        privateHost: privateAddress(),
+        port: wsCfg.port,
+        numClient
+      };
+      await set(statusKey(status), JSON.stringify(status));
+      log.debug(`${tag} updated num_client number: ${statusKey(status)} => ${numClient}`);
     });
 
 
@@ -84,7 +113,7 @@ const getAllNodeStatuses =
 const writeAlive =
   (client: RedisClient, status: NodesInspectorTypes.NodeStatus) =>
     new Promise((resolve, reject) => {
-      const key = `${keyPrefix}${status.publicHost}:${status.port}`;
+      const key = statusKey(status);
       client.get(key, (err, reply) => {
         if (err) return reject(err);
         if (reply) return resolve();
@@ -92,3 +121,6 @@ const writeAlive =
         client.rpush(listKey, key);
       });
     });
+
+const statusKey = (status: NodesInspectorTypes.NodeStatus) =>
+  `${keyPrefix}${status.publicHost}:${status.port}`;
