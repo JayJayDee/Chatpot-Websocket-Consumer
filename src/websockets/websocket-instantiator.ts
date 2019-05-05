@@ -21,8 +21,12 @@ injectable(WebsocketModules.WebsocketWrap,
 
       if (cfg.adapter === ConfigTypes.WebsocketAdapter.REDIS) {
         log.debug(`${tag} using socket.io-redis adapter..`);
+        if (!cfg.redis.password) delete cfg.redis.password;
+
         await inspectRedisConnection(cfg.redis);
-        ws.adapter(redisAdapter(cfg.redis));
+
+        const adapter = redisAdapter(cfg.redis);
+        ws.adapter(adapter);
         log.debug(`${tag} socket.io-redis adapter set`);
       }
       return ws;

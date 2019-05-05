@@ -16,7 +16,8 @@ injectable(EndpointModules.Node.Status,
         wrapAsync(async (req, res, next) => {
           const node = await pickHealthyNode();
           res.status(200).json({
-            websocket_host: node.publicHost
+            websocket_host: node.publicHost,
+            num_connection: node.numClient
           });
         })
       ]
