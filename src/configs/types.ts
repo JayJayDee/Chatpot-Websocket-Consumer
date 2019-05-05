@@ -5,12 +5,16 @@ export namespace ConfigTypes {
     websocket: WebsocketConfig;
     kvStorage: KeyValueStorageConfig;
     host: HostConfig;
+    http: HttpConfig;
   };
   export type AmqpConfig = {
     host: string;
     port: number;
     login: string;
     password: string;
+  };
+  export type HttpConfig = {
+    port: number;
   };
   export enum Env {
     DEV = 'DEV',

@@ -27,6 +27,9 @@ injectable(ConfigModules.EmptyConfig, [], async (): Promise<ConfigTypes.RootConf
   },
   host: {
     websocket: null
+  },
+  http: {
+    port: null
   }
 }));
 
@@ -48,7 +51,8 @@ injectable(ConfigModules.ConfigRules, [],
     { key: 'WEBSOCKET_REDIS_HOST', path: ['websocket', 'redis', 'host'], defaultValue: null },
     { key: 'WEBSOCKET_REDIS_PORT', path: ['websocket', 'redis', 'port'], defaultValue: null },
     { key: 'WEBSOCKET_REDIS_PASSWORD', path: ['websocket', 'redis', 'password'], defaultValue: null },
-    { key: 'HOST_WEBSOCKET', path: ['host', 'websocket'] }
+    { key: 'HOST_WEBSOCKET', path: ['host', 'websocket'] },
+    { key: 'HTTP_PORT', path: ['http', 'port'] }
   ]));
 
 injectable(ConfigModules.ConfigSource,
@@ -82,6 +86,10 @@ injectable(ConfigModules.KeyValueStorageConfig,
 injectable(ConfigModules.HostConfig,
   [ConfigModules.RootConfig],
   async (root: ConfigTypes.RootConfig) => root.host);
+
+injectable(ConfigModules.HttpConfig,
+  [ConfigModules.RootConfig],
+  async (root: ConfigTypes.RootConfig) => root.http);
 
 injectable(ConfigModules.Env,
   [ConfigModules.ConfigSource],

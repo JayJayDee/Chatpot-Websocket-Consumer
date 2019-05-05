@@ -37,8 +37,10 @@ injectable(NodesInspectorModules.ReportAlive,
 
 
 injectable(NodesInspectorModules.PickHealthyNode,
-  [ KeyValueStorageModules.GetRedisClient ],
-  async (getRedisClient: KeyValueStorageTypes.GetRedisClient): Promise<NodesInspectorTypes.PickHealthyNode> =>
+  [ LoggerModules.Logger,
+    KeyValueStorageModules.GetRedisClient ],
+  async (log: LoggerTypes.Logger,
+    getRedisClient: KeyValueStorageTypes.GetRedisClient): Promise<NodesInspectorTypes.PickHealthyNode> =>
 
     async () => {
       // TODO: to be implemented.
