@@ -43,6 +43,7 @@ injectable(NodesInspectorModules.PickHealthyNode,
     getRedisClient: KeyValueStorageTypes.GetRedisClient): Promise<NodesInspectorTypes.PickHealthyNode> =>
 
     async () => {
+      log.debug(`${tag} picking a health ws-node..`);
       // TODO: to be implemented.
       return null;
     });
