@@ -4,6 +4,7 @@ import { ConfigModules, ConfigTypes } from '../configs';
 import { LoggerModules, LoggerTypes } from '../loggers';
 import { WebsocketTypes } from './types';
 import { NodesInspectorModules, NodesInspectorTypes } from '../nodes-inspector';
+import { Socket } from 'socket.io';
 
 const tag = '[websocket]';
 
@@ -34,17 +35,28 @@ injectable(WebsocketModules.WebsocketRunner,
 const eventRegisterer =
   (log: LoggerTypes.Logger) =>
     (ws: WebsocketTypes.WebsocketWrap) => {
-      ws.on('connection', (socket) => {
-        log.debug(`${tag} connected, id=${socket.id}`);
-        socket.join('test-room');
+      const onConnect = connectionHandler(log);
+      const onDisconnect = disconnectionHandler(log);
+      const onJoin = joinHandler(log);
 
-        socket.on('disconnect', () => {
-          log.debug(`${tag} disconnected, id=${socket.id}`);
-        });
-        socket.on('test', (payload) => {
-          socket.to('test-room').emit('test', payload);
-          socket.emit('test', payload);
-          log.debug(`${tag} test topic published. ${payload}`);
-        });
+      ws.on('connection', (socket) => {
+        onConnect(socket);
+        socket.on('disconnect', () => onDisconnect(socket));
+        socket.on('join', (payload: any) => onJoin(socket, payload));
       });
     };
+
+const connectionHandler = (log: LoggerTypes.Logger) =>
+  (socket: Socket) => {
+    log.debug(`${tag} connected, id=${socket.id}`);
+  };
+
+const disconnectionHandler = (log: LoggerTypes.Logger) =>
+  (socket: Socket) => {
+    log.debug(`${tag} disconnected, id=${socket.id}`);
+  };
+
+const joinHandler = (log: LoggerTypes.Logger) =>
+  (socket: Socket, payload: any) => {
+    log.debug(`${tag} join requested, id=${socket.id}`);
+  };
