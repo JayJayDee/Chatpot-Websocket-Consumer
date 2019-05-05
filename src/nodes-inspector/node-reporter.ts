@@ -21,13 +21,11 @@ class WebsocketUnavailableError extends BaseLogicError {
 
 injectable(NodesInspectorModules.ReportAlive,
   [ LoggerModules.Logger,
-    KeyValueStorageModules.Push,
-    KeyValueStorageModules.Set,
+    KeyValueStorageModules.GetRedisClient,
     ConfigModules.WebsocketConfig,
     ConfigModules.HostConfig ],
   async (log: LoggerTypes.Logger,
-    kvPush: KeyValueStorageTypes.Push,
-    kvSet: KeyValueStorageTypes.Set,
+    getRedisClient: KeyValueStorageTypes.GetRedisClient,
     wsCfg: ConfigTypes.WebsocketConfig,
     hostCfg: ConfigTypes.HostConfig): Promise<NodesInspectorTypes.ReportAlive> =>
 
@@ -38,10 +36,9 @@ injectable(NodesInspectorModules.ReportAlive,
         port: wsCfg.port,
         numClient: 0
       };
+      const client = await getRedisClient();
+      await writeAlive(client, status);
 
-      const key = `${keyPrefix}${status.privateHost}:${status.port}`;
-      await kvPush(listKey, key, 100);
-      await kvSet(key, status);
       log.debug(`${tag} reported as a new websocket node`);
     });
 
@@ -71,6 +68,7 @@ const getAllNodeStatuses =
         multi.exec((err, datas) => {
           if (err) return reject(err);
           const parsed = datas
+            .filter((d) => d)
             .map((d) => JSON.parse(d))
             .map((elem) => ({
               publicHost: elem.publicHost,
@@ -80,5 +78,17 @@ const getAllNodeStatuses =
             }));
           resolve(parsed);
         });
+      });
+    });
+
+const writeAlive =
+  (client: RedisClient, status: NodesInspectorTypes.NodeStatus) =>
+    new Promise((resolve, reject) => {
+      const key = `${keyPrefix}${status.publicHost}:${status.port}`;
+      client.get(key, (err, reply) => {
+        if (err) return reject(err);
+        if (reply) return resolve();
+        client.set(key, JSON.stringify(status));
+        client.rpush(listKey, key);
       });
     });
