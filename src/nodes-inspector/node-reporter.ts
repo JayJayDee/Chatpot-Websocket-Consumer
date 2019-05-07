@@ -31,12 +31,10 @@ const privateAddress = () => {
 injectable(NodesInspectorModules.ReportAlive,
   [ LoggerModules.Logger,
     KeyValueStorageModules.GetRedisClient,
-    KeyValueStorageModules.Set,
     ConfigModules.WebsocketConfig,
     ConfigModules.HostConfig ],
   async (log: LoggerTypes.Logger,
     getRedisClient: KeyValueStorageTypes.GetRedisClient,
-    set: KeyValueStorageTypes.Set,
     wsCfg: ConfigTypes.WebsocketConfig,
     hostCfg: ConfigTypes.HostConfig): Promise<NodesInspectorTypes.ReportAlive> =>
 
@@ -48,8 +46,6 @@ injectable(NodesInspectorModules.ReportAlive,
       };
       const client = await getRedisClient();
       await writeAlive(client, status);
-      await set(countKey(status), '0');
-
       log.debug(`${tag} reported as a new websocket node`);
     });
 
@@ -186,11 +182,15 @@ const writeAlive =
   (client: RedisClient, status: NodesInspectorTypes.NodeStatusParam) =>
     new Promise((resolve, reject) => {
       const key = statusKey(status);
+      const ckey = countKey(status);
       client.get(key, (err, reply) => {
         if (err) return reject(err);
         if (reply) return resolve();
-        client.set(key, JSON.stringify(status));
-        client.rpush(listKey, key);
+        client.multi()
+          .set(key, JSON.stringify(status))
+          .set(ckey, '0')
+          .rpush(listKey, key)
+          .exec();
       });
     });
 
