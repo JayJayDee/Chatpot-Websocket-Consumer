@@ -39,11 +39,10 @@ injectable(NodesInspectorModules.ReportAlive,
     hostCfg: ConfigTypes.HostConfig): Promise<NodesInspectorTypes.ReportAlive> =>
 
     async () => {
-      const status: NodesInspectorTypes.NodeStatus = {
+      const status: NodesInspectorTypes.NodeStatusParam = {
         publicHost: hostCfg.websocket,
         privateHost: privateAddress(),
-        port: wsCfg.port,
-        numClient: 0
+        port: wsCfg.port
       };
       const client = await getRedisClient();
       await writeAlive(client, status);
@@ -63,14 +62,13 @@ injectable(NodesInspectorModules.UpdateReport,
     wsCfg: ConfigTypes.WebsocketConfig): Promise<NodesInspectorTypes.UpdateReport> =>
 
     async (numClient) => {
-      const status: NodesInspectorTypes.NodeStatus = {
+      const status: NodesInspectorTypes.NodeStatusParam = {
         publicHost: hostCfg.websocket,
         privateHost: privateAddress(),
-        port: wsCfg.port,
-        numClient
+        port: wsCfg.port
       };
       await set(statusKey(status), JSON.stringify(status));
-      log.debug(`${tag} updated num_client number: ${statusKey(status)} => ${numClient}`);
+      await set(countKey(status), 0);
     });
 
 
@@ -110,7 +108,7 @@ injectable(NodesInspectorModules.IncreaseConnection,
           const client = await getRedisClient();
 
           client.incr(key, (err, reply) => {
-            console.log(reply);
+            log.debug(`${tag} increased num_client number: ${statusKey(status)} => ${reply}`);
             if (err) return reject(err);
             resolve();
           });
@@ -138,7 +136,7 @@ injectable(NodesInspectorModules.DescreaseConnection,
           const client = await getRedisClient();
 
           client.decr(key, (err, reply) => {
-            console.log(reply);
+            log.debug(`${tag} decreased num_client number: ${statusKey(status)} => ${reply}`);
             if (err) return reject(err);
             resolve();
           });
@@ -151,25 +149,38 @@ const getAllNodeStatuses =
       client.lrange(listKey, 0, 100, (err, replies: any[]) => {
         if (err) return reject(err);
         const multi = client.multi();
+        const multiNumber = client.multi();
         uniq(replies).forEach((r) => multi.get(r));
+        uniq(replies).map((r) => `${r}${countKeyPostfix}`).forEach((k) => multiNumber.get(k));
+
         multi.exec((err, datas) => {
           if (err) return reject(err);
-          const parsed = datas
-            .filter((d) => d)
-            .map((d) => JSON.parse(d))
-            .map((elem) => ({
-              publicHost: elem.publicHost,
-              privateHost: elem.privateHost,
-              port: elem.port,
-              numClient: elem.numClient
-            }));
-          resolve(parsed);
+
+          multiNumber.exec((err, numbers) => {
+            if (err) return reject(err);
+
+            let idx = 0;
+            const parsed = datas
+              .filter((d) => d)
+              .map((d) => JSON.parse(d))
+              .map((elem) => {
+                const ret =  {
+                  publicHost: elem.publicHost,
+                  privateHost: elem.privateHost,
+                  port: elem.port,
+                  numClient: parseInt(numbers[idx])
+                };
+                idx++;
+                return ret;
+              });
+            resolve(parsed);
+          });
         });
       });
     });
 
 const writeAlive =
-  (client: RedisClient, status: NodesInspectorTypes.NodeStatus) =>
+  (client: RedisClient, status: NodesInspectorTypes.NodeStatusParam) =>
     new Promise((resolve, reject) => {
       const key = statusKey(status);
       client.get(key, (err, reply) => {
