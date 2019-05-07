@@ -19,20 +19,22 @@ injectable(WebsocketModules.WebsocketRunner,
     ConfigModules.HostConfig,
     WebsocketModules.WebsocketWrap,
     NodesInspectorModules.ReportAlive,
-    NodesInspectorModules.UpdateReport ],
+    NodesInspectorModules.IncreaseConnection,
+    NodesInspectorModules.DescreaseConnection ],
   async (log: LoggerTypes.Logger,
     cfg: ConfigTypes.WebsocketConfig,
     hostCfg: ConfigTypes.HostConfig,
     ws: WebsocketTypes.WebsocketWrap,
     reportAlive: NodesInspectorTypes.ReportAlive,
-    updateReport: NodesInspectorTypes.UpdateReport) =>
+    increase: NodesInspectorTypes.IncreaseConnection,
+    decrease: NodesInspectorTypes.DescreaseConnection) =>
 
     async () => {
       ws.listen(cfg.port);
       await reportAlive();
 
-      const onConnect = connectionHandler(log, updateReport, ws);
-      const onDisconnect = disconnectionHandler(log, updateReport, ws);
+      const onConnect = connectionHandler(log, increase, ws);
+      const onDisconnect = disconnectionHandler(log, decrease, ws);
       const onJoin = joinHandler(log);
       const onPublish = publishHandler(log);
 
@@ -49,33 +51,19 @@ injectable(WebsocketModules.WebsocketRunner,
 
 const connectionHandler =
   (log: LoggerTypes.Logger,
-    updateReport: NodesInspectorTypes.UpdateReport,
+    increase: NodesInspectorTypes.IncreaseConnection,
     ws: WebsocketTypes.WebsocketWrap) =>
       (socket: Socket) => {
-        ws.clients((err, clients) => {
-          if (err) {
-            log.error(err);
-            return;
-          }
-          const numClient = clients.length;
-          updateReport(numClient);
-        });
+        increase();
         log.debug(`${tag} connected, id=${socket.id}`);
       };
 
 const disconnectionHandler =
   (log: LoggerTypes.Logger,
-    updateReport: NodesInspectorTypes.UpdateReport,
+    decrease: NodesInspectorTypes.DescreaseConnection,
     ws: WebsocketTypes.WebsocketWrap) =>
       (socket: Socket) => {
-        ws.clients((err, clients) => {
-          if (err) {
-            log.error(err);
-            return;
-          }
-          const numClient = clients.length;
-          updateReport(numClient);
-        });
+        decrease();
         log.debug(`${tag} disconnected, id=${socket.id}`);
       };
 

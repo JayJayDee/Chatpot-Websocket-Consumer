@@ -11,6 +11,7 @@ import { BaseLogicError } from '../errors';
 
 const tag = '[ws-node-reporter]';
 const keyPrefix = 'WS_NODE_';
+const countKeyPostfix = '_COUNT';
 const listKey = 'WS_NODES';
 
 class WebsocketUnavailableError extends BaseLogicError {
@@ -25,6 +26,7 @@ const privateAddress = () => {
   privAddr = address();
   return privAddr;
 };
+
 
 injectable(NodesInspectorModules.ReportAlive,
   [ LoggerModules.Logger,
@@ -87,6 +89,62 @@ injectable(NodesInspectorModules.PickHealthyNode,
     });
 
 
+injectable(NodesInspectorModules.IncreaseConnection,
+  [ LoggerModules.Logger,
+    KeyValueStorageModules.GetRedisClient,
+    ConfigModules.WebsocketConfig,
+    ConfigModules.HostConfig ],
+  async (log: LoggerTypes.Logger,
+    getRedisClient: KeyValueStorageTypes.GetRedisClient,
+    wsCfg: ConfigTypes.WebsocketConfig,
+    hostCfg: ConfigTypes.HostConfig): Promise<NodesInspectorTypes.IncreaseConnection> =>
+
+      () =>
+        new Promise(async (resolve, reject) => {
+          const status: NodesInspectorTypes.NodeStatusParam = {
+            publicHost: hostCfg.websocket,
+            privateHost: privateAddress(),
+            port: wsCfg.port,
+          };
+          const key = countKey(status);
+          const client = await getRedisClient();
+
+          client.incr(key, (err, reply) => {
+            console.log(reply);
+            if (err) return reject(err);
+            resolve();
+          });
+        }));
+
+
+injectable(NodesInspectorModules.DescreaseConnection,
+  [ LoggerModules.Logger,
+    KeyValueStorageModules.GetRedisClient,
+    ConfigModules.WebsocketConfig,
+    ConfigModules.HostConfig ],
+  async (log: LoggerTypes.Logger,
+    getRedisClient: KeyValueStorageTypes.GetRedisClient,
+    wsCfg: ConfigTypes.WebsocketConfig,
+    hostCfg: ConfigTypes.HostConfig): Promise<NodesInspectorTypes.DescreaseConnection> =>
+
+      () =>
+        new Promise(async (resolve, reject) => {
+          const status: NodesInspectorTypes.NodeStatusParam = {
+            publicHost: hostCfg.websocket,
+            privateHost: privateAddress(),
+            port: wsCfg.port,
+          };
+          const key = countKey(status);
+          const client = await getRedisClient();
+
+          client.decr(key, (err, reply) => {
+            console.log(reply);
+            if (err) return reject(err);
+            resolve();
+          });
+        }));
+
+
 const getAllNodeStatuses =
   (client: RedisClient): Promise<NodesInspectorTypes.NodeStatus[]> =>
     new Promise((resolve, reject) => {
@@ -122,5 +180,8 @@ const writeAlive =
       });
     });
 
-const statusKey = (status: NodesInspectorTypes.NodeStatus) =>
+const statusKey = (status: NodesInspectorTypes.NodeStatusParam) =>
   `${keyPrefix}${status.publicHost}:${status.port}`;
+
+const countKey = (status: NodesInspectorTypes.NodeStatusParam) =>
+  `${statusKey(status)}${countKeyPostfix}`;
