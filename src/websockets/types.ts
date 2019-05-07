@@ -8,6 +8,11 @@ export namespace WebsocketTypes {
     on: (event: string, callback: SocketCallback) => void;
     listen: (port: number) => void;
     clients: (callback: ClientsCallback) => void;
+    of: (uri: string) => {
+      adapter: {
+        clients: (callback: ClientsCallback) => void;
+      }
+    };
   };
 
   export type WebsocketInstantiator = () => Promise<WebsocketWrap>;

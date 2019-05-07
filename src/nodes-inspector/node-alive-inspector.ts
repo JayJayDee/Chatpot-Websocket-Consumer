@@ -18,7 +18,6 @@ injectable(NodesInspectorModules.Inspect,
         getRedisClient().then((client) => {
           client.lrange(listKey, 0, 100, (err, replies) => {
             if (err) return reject(err);
-            console.log(replies.length);
           });
         });
       }));
