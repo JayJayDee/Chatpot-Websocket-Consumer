@@ -190,7 +190,10 @@ const writeAlive =
           .set(key, JSON.stringify(status))
           .set(ckey, '0')
           .rpush(listKey, key)
-          .exec();
+          .exec((err, reply) => {
+            if (err) return reject(err);
+            resolve();
+          });
       });
     });
 

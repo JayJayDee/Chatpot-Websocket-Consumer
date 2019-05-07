@@ -30,6 +30,7 @@ injectable(WebsocketModules.WebsocketRunner,
     decrease: NodesInspectorTypes.DescreaseConnection) =>
 
     async () => {
+      log.debug(`${tag} websocket server starting...`);
       ws.listen(cfg.port);
       await reportAlive();
 
@@ -37,12 +38,14 @@ injectable(WebsocketModules.WebsocketRunner,
       const onDisconnect = disconnectionHandler(log, decrease, ws);
       const onJoin = joinHandler(log);
       const onPublish = publishHandler(log);
+      const onHealth = healthHandler(log);
 
       ws.on('connection', (socket) => {
         onConnect(socket);
         socket.on('disconnect', () => onDisconnect(socket));
         socket.on('join', (payload: any) => onJoin(socket, payload));
         socket.on('publish', (payload: any) => onPublish(socket, payload));
+        socket.on('health_req', (payload: any) => onHealth(socket, payload));
       });
 
       log.debug(`${tag} websocket server started, port:${cfg.port}`);
@@ -83,6 +86,12 @@ const joinHandler = (log: LoggerTypes.Logger) =>
 const publishHandler = (log: LoggerTypes.Logger) =>
   (socket: Socket, payload: any) => {
     // TODO: to be implemented
+  };
+
+const healthHandler = (log: LoggerTypes.Logger) =>
+  (socket: Socket, payload: any) => {
+    log.debug(`${tag} health check requested`);
+    socket.emit('health_res', {});
   };
 
 const emitError = (socket: Socket, payload: ErrorPayload) =>
