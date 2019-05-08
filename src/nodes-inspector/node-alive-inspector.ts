@@ -16,7 +16,7 @@ injectable(NodesInspectorModules.InspectionRunner,
     inspect: NodesInspectorTypes.Inspect): Promise<NodesInspectorTypes.InspectionRunner> =>
 
     async () => {
-      const period = 10;
+      const period = 20;
       log.debug(`${tag} ws-inspector up and running, period:${period} sec`);
       setInterval(() => inspect(), period * 1000);
     });
@@ -30,21 +30,83 @@ injectable(NodesInspectorModules.Inspect,
 
     () =>
       new Promise((resolve, reject) => {
+        let redisClient: RedisClient = null;
         getRedisClient()
-        .then((client) => getNodeStatuses(client))
+        .then((client) => {
+          redisClient = client;
+          return getNodeStatuses(client);
+        })
         .then((statuses) => {
-          console.log(statuses);
-          console.log(io);
+          const promises = Object.keys(statuses).map((key) =>
+            inspectNodeAlive(key, statuses[key]));
+          return Promise.all(promises);
+        })
+        .then((results) => {
+          const deads = results.filter((r) => r.alive === false);
+          if (deads.length > 0) {
+            const promises = deads.map((d) =>
+              cleanUpDeads(redisClient, d.key));
+            Promise.all(promises);
+            log.debug(`${tag} inspection completed. all_node:${results.length} / dead:${promises.length}`);
+            resolve();
+          } else {
+            Promise.resolve();
+            log.debug(`${tag} inspection completed. all_node:${results.length} / dead:0`);
+            resolve();
+          }
         })
         .catch((err) => {
           reject(err);
         });
       }));
 
-// const checkNodeStatus = (key: string, node: NodesInspectorTypes.NodeStatusParam) =>
-//   new Promise((resolve, reject) => {
 
-//   });
+const cleanUpDeads = (client: RedisClient, key: string): Promise<void> =>
+  new Promise((resolve, reject) => {
+    client.multi()
+      .lrem(listKey, 5, key)
+      .del(key)
+      .del(`${key}_COUNT`)
+      .exec((err, resp) => {
+        if (err) return reject(err);
+        resolve();
+      });
+  });
+
+type InspectionResult = {
+  alive: boolean;
+  key: string;
+};
+
+const inspectNodeAlive =
+  (key: string, node: NodesInspectorTypes.NodeStatusParam): Promise<InspectionResult> =>
+    new Promise((resolve, reject) => {
+      let done = false;
+      const socket = io.connect(`${node.publicHost}:${node.publicPort}`);
+
+      setTimeout(() => {
+        if (socket.connected === true) socket.disconnect();
+        if (done === false) {
+          done = true;
+          return resolve({
+            alive: false,
+            key
+          });
+        }
+      }, 5000);
+
+      socket.on('connect', () => socket.emit('health_req', {}));
+      socket.on('health_res', (payload: any) => {
+        if (socket.connected === true) socket.disconnect();
+        if (done === false) {
+          done = true;
+          return resolve({
+            alive: true,
+            key
+          });
+        }
+      });
+    });
 
 const getNodeStatuses =
   (client: RedisClient): Promise<{ [key: string]: NodesInspectorTypes.NodeStatusParam }> =>
