@@ -93,7 +93,7 @@ const inspectNodeAlive =
             key
           });
         }
-      }, 5000);
+      }, 10000);
 
       socket.on('connect', () => socket.emit('health_req', {}));
       socket.on('health_res', (payload: any) => {
