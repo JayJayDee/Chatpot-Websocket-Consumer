@@ -49,7 +49,7 @@ injectable(WebsocketModules.WebsocketRunner,
       });
 
       log.debug(`${tag} websocket server started, port:${cfg.port}`);
-      log.debug(`${tag} websocket public host: ${hostCfg.websocket}`);
+      log.debug(`${tag} websocket public host:${hostCfg.websocket}, public port:${cfg.publicPort}`);
     });
 
 const connectionHandler =

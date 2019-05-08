@@ -9,6 +9,19 @@ import { RedisClient } from 'redis';
 const tag = '[ws-node-inspector]';
 const listKey = 'WS_NODES';
 
+injectable(NodesInspectorModules.InspectionRunner,
+  [ LoggerModules.Logger,
+    NodesInspectorModules.Inspect ],
+  async (log: LoggerTypes.Logger,
+    inspect: NodesInspectorTypes.Inspect): Promise<NodesInspectorTypes.InspectionRunner> =>
+
+    async () => {
+      const period = 10;
+      log.debug(`${tag} ws-inspector up and running, period:${period} sec`);
+      setInterval(() => inspect(), period * 1000);
+    });
+
+
 injectable(NodesInspectorModules.Inspect,
   [ LoggerModules.Logger,
     KeyValueStorageModules.GetRedisClient ],
@@ -28,6 +41,11 @@ injectable(NodesInspectorModules.Inspect,
         });
       }));
 
+// const checkNodeStatus = (key: string, node: NodesInspectorTypes.NodeStatusParam) =>
+//   new Promise((resolve, reject) => {
+
+//   });
+
 const getNodeStatuses =
   (client: RedisClient): Promise<{ [key: string]: NodesInspectorTypes.NodeStatusParam }> =>
     new Promise((resolve, reject) => {
@@ -46,23 +64,12 @@ const getNodeStatuses =
             resp[key] = {
               publicHost: parsed.publicHost,
               privateHost: parsed.privateHost,
-              port: parsed.port
+              port: parsed.port,
+              publicPort: parsed.publicPort
             };
             idx++;
           });
           resolve(resp);
         });
       });
-    });
-
-injectable(NodesInspectorModules.InspectionRunner,
-  [ LoggerModules.Logger,
-    NodesInspectorModules.Inspect ],
-  async (log: LoggerTypes.Logger,
-    inspect: NodesInspectorTypes.Inspect): Promise<NodesInspectorTypes.InspectionRunner> =>
-
-    async () => {
-      const period = 10;
-      log.debug(`${tag} ws-inspector up and running, period:${period} sec`);
-      setInterval(() => inspect(), period * 1000);
     });

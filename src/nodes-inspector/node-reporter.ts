@@ -42,7 +42,8 @@ injectable(NodesInspectorModules.ReportAlive,
       const status: NodesInspectorTypes.NodeStatusParam = {
         publicHost: hostCfg.websocket,
         privateHost: privateAddress(),
-        port: wsCfg.port
+        port: wsCfg.port,
+        publicPort: wsCfg.publicPort
       };
       const client = await getRedisClient();
       await writeAlive(client, status);
@@ -64,7 +65,8 @@ injectable(NodesInspectorModules.UpdateReport,
       const status: NodesInspectorTypes.NodeStatusParam = {
         publicHost: hostCfg.websocket,
         privateHost: privateAddress(),
-        port: wsCfg.port
+        port: wsCfg.port,
+        publicPort: wsCfg.publicPort
       };
       await set(statusKey(status), JSON.stringify(status));
       await set(countKey(status), '0');
@@ -102,6 +104,7 @@ injectable(NodesInspectorModules.IncreaseConnection,
             publicHost: hostCfg.websocket,
             privateHost: privateAddress(),
             port: wsCfg.port,
+            publicPort: wsCfg.publicPort
           };
           const key = countKey(status);
           const client = await getRedisClient();
@@ -130,6 +133,7 @@ injectable(NodesInspectorModules.DescreaseConnection,
             publicHost: hostCfg.websocket,
             privateHost: privateAddress(),
             port: wsCfg.port,
+            publicPort: wsCfg.publicPort
           };
           const key = countKey(status);
           const client = await getRedisClient();
@@ -167,6 +171,7 @@ const getAllNodeStatuses =
                   publicHost: elem.publicHost,
                   privateHost: elem.privateHost,
                   port: elem.port,
+                  publicPort: elem.publicPort,
                   numClient: parseInt(numbers[idx])
                 };
                 idx++;
