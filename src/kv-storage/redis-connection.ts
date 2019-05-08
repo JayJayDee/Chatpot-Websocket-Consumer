@@ -25,6 +25,8 @@ injectable(KeyValueStorageModules.GetRedisClient,
         redisClient = createClient(cfg.redis);
 
         redisClient.on('error', (err) => {
+          log.error(`${tag} redis error fired!`);
+          log.error(err);
           redisClient = createClient(cfg.redis);
         });
 
