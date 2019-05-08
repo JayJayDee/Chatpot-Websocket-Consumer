@@ -20,6 +20,12 @@ class WebsocketUnavailableError extends BaseLogicError {
   }
 }
 
+class NodeDuplicationError extends BaseLogicError {
+  constructor(keyName: string) {
+    super('NODE_DUPLICATED', `there are duplicated node: ${keyName}`);
+  }
+}
+
 let privAddr: string = null;
 const privateAddress = () => {
   if (privAddr) return privAddr;
@@ -185,7 +191,9 @@ const writeAlive =
       const ckey = countKey(status);
       client.get(key, (err, reply) => {
         if (err) return reject(err);
-        if (reply) return resolve();
+        if (reply) {
+          return reject(new NodeDuplicationError(key));
+        }
         client.multi()
           .set(key, JSON.stringify(status))
           .set(ckey, '0')
