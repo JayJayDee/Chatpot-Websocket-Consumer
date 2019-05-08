@@ -8,6 +8,7 @@ import { EndpointTypes } from './types';
 import { ConfigModules, ConfigTypes } from '../configs';
 import { LoggerModules, LoggerTypes } from '../loggers';
 import { MiddlewareModules, MiddlewareTypes } from '../middlewares';
+import { SwaggerModules, SwaggerTypes } from '../swagger';
 
 injectable(EndpointModules.EndpointRunner,
 
@@ -15,17 +16,21 @@ injectable(EndpointModules.EndpointRunner,
     LoggerModules.Logger,
     EndpointModules.Endpoints,
     MiddlewareModules.Error,
-    MiddlewareModules.NotFound],
+    MiddlewareModules.NotFound,
+    SwaggerModules.SwaggerRegisterer],
 
   async (cfg: ConfigTypes.HttpConfig,
     log: LoggerTypes.Logger,
     endpoints: EndpointTypes.Endpoint[],
     error: MiddlewareTypes.Error,
-    notFound: MiddlewareTypes.NotFound): Promise<EndpointTypes.EndpointRunner> =>
+    notFound: MiddlewareTypes.NotFound,
+    swagger: SwaggerTypes.SwaggerRegisterer): Promise<EndpointTypes.EndpointRunner> =>
 
     () => {
       const app = express();
       app.use(bodyParser.urlencoded({ extended: true }));
+
+      swagger(app);
 
       registerEndpoints(app, endpoints, log);
       app.use(error);
