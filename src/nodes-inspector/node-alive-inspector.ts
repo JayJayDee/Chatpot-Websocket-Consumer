@@ -33,18 +33,31 @@ injectable(NodesInspectorModules.Inspect,
         getRedisClient()
         .then((client) => getNodeStatuses(client))
         .then((statuses) => {
-          console.log(statuses);
+          const promises = Object.keys(statuses).map((key) =>
+            inspectNodeAlive(key, statuses[key]));
           console.log(io);
+          return Promise.all(promises);
+        })
+        .then((results) => {
+          console.log(results);
         })
         .catch((err) => {
           reject(err);
         });
       }));
 
-// const checkNodeStatus = (key: string, node: NodesInspectorTypes.NodeStatusParam) =>
-//   new Promise((resolve, reject) => {
+type InspectionResult = {
+  alive: boolean;
+  key: string;
+};
 
-//   });
+const inspectNodeAlive =
+  (key: string, node: NodesInspectorTypes.NodeStatusParam): Promise<InspectionResult> =>
+    new Promise((resolve, reject) => {
+      console.log(key);
+      console.log(node);
+      resolve(null);
+    });
 
 const getNodeStatuses =
   (client: RedisClient): Promise<{ [key: string]: NodesInspectorTypes.NodeStatusParam }> =>
