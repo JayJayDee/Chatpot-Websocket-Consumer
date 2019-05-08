@@ -20,12 +20,6 @@ class WebsocketUnavailableError extends BaseLogicError {
   }
 }
 
-class NodeDuplicationError extends BaseLogicError {
-  constructor(keyName: string) {
-    super('NODE_DUPLICATED', `there are duplicated node: ${keyName}`);
-  }
-}
-
 let privAddr: string = null;
 const privateAddress = () => {
   if (privAddr) return privAddr;
@@ -48,7 +42,8 @@ injectable(NodesInspectorModules.ReportAlive,
       const status: NodesInspectorTypes.NodeStatusParam = {
         publicHost: hostCfg.websocket,
         privateHost: privateAddress(),
-        port: wsCfg.port
+        port: wsCfg.port,
+        publicPort: wsCfg.publicPort
       };
       const client = await getRedisClient();
       await writeAlive(client, status);
@@ -70,7 +65,8 @@ injectable(NodesInspectorModules.UpdateReport,
       const status: NodesInspectorTypes.NodeStatusParam = {
         publicHost: hostCfg.websocket,
         privateHost: privateAddress(),
-        port: wsCfg.port
+        port: wsCfg.port,
+        publicPort: wsCfg.publicPort
       };
       await set(statusKey(status), JSON.stringify(status));
       await set(countKey(status), '0');
@@ -108,6 +104,7 @@ injectable(NodesInspectorModules.IncreaseConnection,
             publicHost: hostCfg.websocket,
             privateHost: privateAddress(),
             port: wsCfg.port,
+            publicPort: wsCfg.publicPort
           };
           const key = countKey(status);
           const client = await getRedisClient();
@@ -136,6 +133,7 @@ injectable(NodesInspectorModules.DescreaseConnection,
             publicHost: hostCfg.websocket,
             privateHost: privateAddress(),
             port: wsCfg.port,
+            publicPort: wsCfg.publicPort
           };
           const key = countKey(status);
           const client = await getRedisClient();
@@ -173,6 +171,7 @@ const getAllNodeStatuses =
                   publicHost: elem.publicHost,
                   privateHost: elem.privateHost,
                   port: elem.port,
+                  publicPort: elem.publicPort,
                   numClient: parseInt(numbers[idx])
                 };
                 idx++;
@@ -192,7 +191,13 @@ const writeAlive =
       client.get(key, (err, reply) => {
         if (err) return reject(err);
         if (reply) {
-          return reject(new NodeDuplicationError(key));
+          return client.multi()
+            .set(key, JSON.stringify(status))
+            .set(ckey, '0')
+            .exec((err, reply) => {
+              if (err) return reject(err);
+              resolve();
+            });
         }
         client.multi()
           .set(key, JSON.stringify(status))

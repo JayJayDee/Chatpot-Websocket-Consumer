@@ -3,6 +3,7 @@ export namespace NodesInspectorTypes {
     publicHost: string;
     privateHost: string;
     port: number;
+    publicPort: number;
     numClient: number;
   };
 
@@ -10,6 +11,7 @@ export namespace NodesInspectorTypes {
     publicHost: string;
     privateHost: string;
     port: number;
+    publicPort: number;
   };
 
   export type Inspect = () => Promise<void>;

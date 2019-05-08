@@ -34,6 +34,7 @@ export namespace ConfigTypes {
   }
   export type WebsocketConfig = {
     port: number;
+    publicPort: number;
     adapter: WebsocketAdapter;
     redis?: RedisConfig;
   };

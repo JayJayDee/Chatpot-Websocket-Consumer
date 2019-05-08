@@ -19,7 +19,8 @@ injectable(ConfigModules.EmptyConfig, [], async (): Promise<ConfigTypes.RootConf
   websocket: {
     port: null,
     adapter: null,
-    redis: null
+    redis: null,
+    publicPort: null
   },
   kvStorage: {
     provider: null,
@@ -47,6 +48,7 @@ injectable(ConfigModules.ConfigRules, [],
     { key: 'KV_STORAGE_REDIS_PORT', path: ['kvStorage', 'redis', 'port'], defaultValue: null },
     { key: 'KV_STORAGE_REDIS_PASSWORD', path: ['kvStorage', 'redis', 'password'], defaultValue: null },
     { key: 'WEBSOCKET_PORT', path: ['websocket', 'port'] },
+    { key: 'WEBSOCKET_PUBLIC_PORT', path: ['websocket', 'publicPort'] },
     { key: 'WEBSOCKET_ADAPTER', path: ['websocket', 'adapter'], defaultValue: 'MEMORY' },
     { key: 'WEBSOCKET_REDIS_HOST', path: ['websocket', 'redis', 'host'], defaultValue: null },
     { key: 'WEBSOCKET_REDIS_PORT', path: ['websocket', 'redis', 'port'], defaultValue: null },
