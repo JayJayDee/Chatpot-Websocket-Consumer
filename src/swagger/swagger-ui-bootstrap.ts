@@ -6,8 +6,8 @@ const apiDocOptions = {
   apis: [`${__dirname}/*.yaml`],
   swaggerDefinition: {
     info: {
-      title: 'Chatpot-Room-API',
-      description: 'Chatpot chating room APIs',
+      title: 'Chatpot-Websocket-API',
+      description: 'Chatpot websocket cluster loadbalacing APIs',
       version: '1.0.0'
     }
   },
