@@ -24,6 +24,14 @@ injectable(KeyValueStorageModules.GetRedisClient,
         if (!cfg.redis.password) delete cfg.redis.password;
         redisClient = createClient(cfg.redis);
 
+        redisClient.on('error', (err) => {
+          redisClient = createClient(cfg.redis);
+        });
+
+        redisClient.on('end', () => {
+          redisClient = createClient(cfg.redis);
+        });
+
         log.info(`${tag} establishing redis connection ...`);
 
         redisClient.get('1', (err, reply) => {
