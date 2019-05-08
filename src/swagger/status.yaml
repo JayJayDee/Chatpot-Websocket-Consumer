@@ -1,0 +1,23 @@
+---
+tags:
+  name: Status
+  description: Socket.IO 클러스터 상태 반환 API
+
+/status:
+  get:
+    summary: Socket.IO 클러스터 중 최적의 노드 접속 정보를 반환한다.
+    tags: [Status]
+    responses:
+      200:
+        description: 성공
+        type: object
+        properties:
+          host:
+            description: Socket.IO 접속 host
+            type: string
+          port:
+            description: Scoket.IO 접속 port
+            type: number
+          num_connection:
+            description: 현재 노드의 접속자 수
+            type: number
