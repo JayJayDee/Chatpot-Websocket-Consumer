@@ -31,6 +31,9 @@ injectable(ConfigModules.EmptyConfig, [], async (): Promise<ConfigTypes.RootConf
   },
   http: {
     port: null
+  },
+  extapi: {
+    roomBaseUri: null
   }
 }));
 
@@ -54,7 +57,8 @@ injectable(ConfigModules.ConfigRules, [],
     { key: 'WEBSOCKET_REDIS_PORT', path: ['websocket', 'redis', 'port'], defaultValue: null },
     { key: 'WEBSOCKET_REDIS_PASSWORD', path: ['websocket', 'redis', 'password'], defaultValue: null },
     { key: 'HOST_WEBSOCKET', path: ['host', 'websocket'] },
-    { key: 'HTTP_PORT', path: ['http', 'port'] }
+    { key: 'HTTP_PORT', path: ['http', 'port'] },
+    { key: 'EXTAPI_ROOM_URI', path: ['extapi', 'roomBaseUri'] }
   ]));
 
 injectable(ConfigModules.ConfigSource,
@@ -92,6 +96,10 @@ injectable(ConfigModules.HostConfig,
 injectable(ConfigModules.HttpConfig,
   [ConfigModules.RootConfig],
   async (root: ConfigTypes.RootConfig) => root.http);
+
+injectable(ConfigModules.ExtApiConfig,
+  [ConfigModules.RootConfig],
+  async (root: ConfigTypes.RootConfig) => root.extapi);
 
 injectable(ConfigModules.Env,
   [ConfigModules.ConfigSource],

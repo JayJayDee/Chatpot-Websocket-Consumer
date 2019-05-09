@@ -6,6 +6,7 @@ export namespace ConfigTypes {
     kvStorage: KeyValueStorageConfig;
     host: HostConfig;
     http: HttpConfig;
+    extapi: ExternalApiConfig;
   };
   export type AmqpConfig = {
     host: string;
@@ -53,6 +54,9 @@ export namespace ConfigTypes {
   export enum CacheProvider {
     MEMORY = 'MEMORY', REDIS = 'REDIS'
   }
+  export type ExternalApiConfig = {
+    roomBaseUri: string;
+  };
   export type ConfigSource = {[key: string]: any};
   export type ConfigReader = () => Promise<ConfigSource>;
   export type ConfigParser = (src: ConfigSource, rules: ConfigRule[]) => RootConfig;
