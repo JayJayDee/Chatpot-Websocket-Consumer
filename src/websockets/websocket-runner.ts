@@ -76,7 +76,7 @@ const disconnectionHandler =
 const joinHandler =
   (log: LoggerTypes.Logger,
     getMyRooms: ExtApiTypes.RequestMyRooms) =>
-      (socket: Socket, payload: any) => {
+      async (socket: Socket, payload: any) => {
         log.debug(`${tag} join requested, id=${socket.id}`);
 
         if (!payload.token) {
@@ -84,7 +84,22 @@ const joinHandler =
             code: 'INVALID_PARAM',
             message: 'payload with join request must have token'
           });
+          return;
         }
+
+        // join to room topics
+        let rooms: string[] = null;
+        try {
+          rooms = await getMyRooms(payload.token);
+        } catch (err) {
+          emitError(socket, {
+            code: 'INVALID_PARAM',
+            message: 'invalid member_token'
+          });
+          return;
+        }
+        rooms.forEach((r) => socket.join(r));
+
         // TODO: to be implemented
       };
 
