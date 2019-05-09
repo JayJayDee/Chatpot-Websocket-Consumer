@@ -7,7 +7,7 @@ export namespace NodesInspectorTypes {
     numClient: number;
   };
 
-  export type NodeStatusParam = {
+  export type NodeStatusPatial = {
     publicHost: string;
     privateHost: string;
     port: number;
