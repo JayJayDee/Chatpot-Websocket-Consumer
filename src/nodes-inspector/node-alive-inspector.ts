@@ -79,7 +79,7 @@ type InspectionResult = {
 };
 
 const inspectNodeAlive =
-  (key: string, node: NodesInspectorTypes.NodeStatusParam): Promise<InspectionResult> =>
+  (key: string, node: NodesInspectorTypes.NodeStatusPatial): Promise<InspectionResult> =>
     new Promise((resolve, reject) => {
       let done = false;
       const socket = io.connect(`${node.publicHost}:${node.publicPort}`);
@@ -109,7 +109,7 @@ const inspectNodeAlive =
     });
 
 const getNodeStatuses =
-  (client: RedisClient): Promise<{ [key: string]: NodesInspectorTypes.NodeStatusParam }> =>
+  (client: RedisClient): Promise<{ [key: string]: NodesInspectorTypes.NodeStatusPatial }> =>
     new Promise((resolve, reject) => {
       client.lrange(listKey, 0, 100, (err, replies) => {
         if (err) return reject(err);
@@ -117,7 +117,7 @@ const getNodeStatuses =
         replies.forEach((r) => multi.get(r));
         multi.exec((err, statuses) => {
           if (err) return reject(err);
-          const resp: { [key: string]: NodesInspectorTypes.NodeStatusParam } = {};
+          const resp: { [key: string]: NodesInspectorTypes.NodeStatusPatial } = {};
           let idx = 0;
           statuses.forEach((s: string) => {
             if (!s) return;

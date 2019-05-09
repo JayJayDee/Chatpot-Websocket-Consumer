@@ -39,7 +39,7 @@ injectable(NodesInspectorModules.ReportAlive,
     hostCfg: ConfigTypes.HostConfig): Promise<NodesInspectorTypes.ReportAlive> =>
 
     async () => {
-      const status: NodesInspectorTypes.NodeStatusParam = {
+      const status: NodesInspectorTypes.NodeStatusPatial = {
         publicHost: hostCfg.websocket,
         privateHost: privateAddress(),
         port: wsCfg.port,
@@ -62,7 +62,7 @@ injectable(NodesInspectorModules.UpdateReport,
     wsCfg: ConfigTypes.WebsocketConfig): Promise<NodesInspectorTypes.UpdateReport> =>
 
     async (numClient) => {
-      const status: NodesInspectorTypes.NodeStatusParam = {
+      const status: NodesInspectorTypes.NodeStatusPatial = {
         publicHost: hostCfg.websocket,
         privateHost: privateAddress(),
         port: wsCfg.port,
@@ -100,7 +100,7 @@ injectable(NodesInspectorModules.IncreaseConnection,
 
       () =>
         new Promise(async (resolve, reject) => {
-          const status: NodesInspectorTypes.NodeStatusParam = {
+          const status: NodesInspectorTypes.NodeStatusPatial = {
             publicHost: hostCfg.websocket,
             privateHost: privateAddress(),
             port: wsCfg.port,
@@ -129,7 +129,7 @@ injectable(NodesInspectorModules.DescreaseConnection,
 
       () =>
         new Promise(async (resolve, reject) => {
-          const status: NodesInspectorTypes.NodeStatusParam = {
+          const status: NodesInspectorTypes.NodeStatusPatial = {
             publicHost: hostCfg.websocket,
             privateHost: privateAddress(),
             port: wsCfg.port,
@@ -184,7 +184,7 @@ const getAllNodeStatuses =
     });
 
 const writeAlive =
-  (client: RedisClient, status: NodesInspectorTypes.NodeStatusParam) =>
+  (client: RedisClient, status: NodesInspectorTypes.NodeStatusPatial) =>
     new Promise((resolve, reject) => {
       const key = statusKey(status);
       const ckey = countKey(status);
@@ -210,8 +210,8 @@ const writeAlive =
       });
     });
 
-const statusKey = (status: NodesInspectorTypes.NodeStatusParam) =>
+const statusKey = (status: NodesInspectorTypes.NodeStatusPatial) =>
   `${keyPrefix}${status.publicHost}:${status.port}`;
 
-const countKey = (status: NodesInspectorTypes.NodeStatusParam) =>
+const countKey = (status: NodesInspectorTypes.NodeStatusPatial) =>
   `${statusKey(status)}${countKeyPostfix}`;
