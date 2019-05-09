@@ -11,5 +11,5 @@ export namespace ExtApiTypes {
   };
   export type Request = (param: RequestParam) => Promise<any>;
 
-  export type RequestMyRooms = (memberToken: string) => Promise<string>;
+  export type RequestMyRooms = (memberToken: string) => Promise<string[]>;
 }

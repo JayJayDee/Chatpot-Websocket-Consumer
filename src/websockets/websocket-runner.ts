@@ -5,6 +5,7 @@ import { LoggerModules, LoggerTypes } from '../loggers';
 import { WebsocketTypes } from './types';
 import { NodesInspectorModules, NodesInspectorTypes } from '../nodes-inspector';
 import { Socket } from 'socket.io';
+import { ExtApiModules, ExtApiTypes } from '../extapis';
 
 const tag = '[websocket]';
 
@@ -20,14 +21,16 @@ injectable(WebsocketModules.WebsocketRunner,
     WebsocketModules.WebsocketWrap,
     NodesInspectorModules.ReportAlive,
     NodesInspectorModules.IncreaseConnection,
-    NodesInspectorModules.DescreaseConnection ],
+    NodesInspectorModules.DescreaseConnection,
+    ExtApiModules.RequestMyRooms ],
   async (log: LoggerTypes.Logger,
     cfg: ConfigTypes.WebsocketConfig,
     hostCfg: ConfigTypes.HostConfig,
     ws: WebsocketTypes.WebsocketWrap,
     reportAlive: NodesInspectorTypes.ReportAlive,
     increase: NodesInspectorTypes.IncreaseConnection,
-    decrease: NodesInspectorTypes.DescreaseConnection) =>
+    decrease: NodesInspectorTypes.DescreaseConnection,
+    requestMyRooms: ExtApiTypes.RequestMyRooms) =>
 
     async () => {
       log.debug(`${tag} websocket server starting...`);
@@ -36,7 +39,7 @@ injectable(WebsocketModules.WebsocketRunner,
 
       const onConnect = connectionHandler(log, increase, ws);
       const onDisconnect = disconnectionHandler(log, decrease, ws);
-      const onJoin = joinHandler(log);
+      const onJoin = joinHandler(log, requestMyRooms);
       const onPublish = publishHandler(log);
       const onHealth = healthHandler(log);
 
@@ -70,18 +73,20 @@ const disconnectionHandler =
         log.debug(`${tag} disconnected, id=${socket.id}`);
       };
 
-const joinHandler = (log: LoggerTypes.Logger) =>
-  (socket: Socket, payload: any) => {
-    log.debug(`${tag} join requested, id=${socket.id}`);
+const joinHandler =
+  (log: LoggerTypes.Logger,
+    getMyRooms: ExtApiTypes.RequestMyRooms) =>
+      (socket: Socket, payload: any) => {
+        log.debug(`${tag} join requested, id=${socket.id}`);
 
-    if (!payload.token) {
-      emitError(socket, {
-        code: 'INVALID_PARAM',
-        message: 'payload with join request must have token'
-      });
-    }
-    // TODO: to be implemented
-  };
+        if (!payload.token) {
+          emitError(socket, {
+            code: 'INVALID_PARAM',
+            message: 'payload with join request must have token'
+          });
+        }
+        // TODO: to be implemented
+      };
 
 const publishHandler = (log: LoggerTypes.Logger) =>
   (socket: Socket, payload: any) => {
