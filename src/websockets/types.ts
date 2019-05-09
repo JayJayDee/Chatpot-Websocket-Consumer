@@ -4,6 +4,10 @@ export namespace WebsocketTypes {
   type SocketCallback = (socket: Socket) => void;
   type ClientsCallback = (err: Error, clients: string[]) => void;
 
+  type IoGlobalTo = {
+    emit: (event: string, payload: any) => void
+  };
+
   export type WebsocketWrap = {
     on: (event: string, callback: SocketCallback) => void;
     listen: (port: number) => void;
@@ -13,6 +17,7 @@ export namespace WebsocketTypes {
         clients: (callback: ClientsCallback) => void;
       }
     };
+    to: (roomId: string) => IoGlobalTo;
   };
 
   export type WebsocketInstantiator = () => Promise<WebsocketWrap>;
