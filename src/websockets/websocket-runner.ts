@@ -1,4 +1,5 @@
 import { injectable } from 'smart-factory';
+import { extend } from 'lodash';
 import { WebsocketModules } from './modules';
 import { ConfigModules, ConfigTypes } from '../configs';
 import { LoggerModules, LoggerTypes } from '../loggers';
@@ -39,14 +40,14 @@ injectable(WebsocketModules.WebsocketRunner,
 
       const onConnect = connectionHandler(log, increase, ws);
       const onDisconnect = disconnectionHandler(log, decrease, ws);
-      const onJoin = joinHandler(log, requestMyRooms);
+      const onPostInit = postInitHandler(log, requestMyRooms);
       const onPublish = publishHandler(log);
       const onHealth = healthHandler(log);
 
       ws.on('connection', (socket) => {
         onConnect(socket);
         socket.on('disconnect', () => onDisconnect(socket));
-        socket.on('join', (payload: any) => onJoin(socket, payload));
+        socket.on('postinit_req', (payload: any) => onPostInit(socket, payload));
         socket.on('publish', (payload: any) => onPublish(socket, payload));
         socket.on('health_req', (payload: any) => onHealth(socket, payload));
       });
@@ -73,11 +74,11 @@ const disconnectionHandler =
         log.debug(`${tag} disconnected, id=${socket.id}`);
       };
 
-const joinHandler =
+const postInitHandler =
   (log: LoggerTypes.Logger,
     getMyRooms: ExtApiTypes.RequestMyRooms) =>
       async (socket: Socket, payload: any) => {
-        log.debug(`${tag} join requested, id=${socket.id}`);
+        log.debug(`${tag} init requested, id=${socket.id}`);
 
         if (!payload.token) {
           emitError(socket, {
@@ -99,8 +100,9 @@ const joinHandler =
           return;
         }
         rooms.forEach((r) => socket.join(r));
-
-        // TODO: to be implemented
+        socket.emit('init_res', {
+          success: true
+        });
       };
 
 const publishHandler = (log: LoggerTypes.Logger) =>
@@ -115,4 +117,4 @@ const healthHandler = (log: LoggerTypes.Logger) =>
   };
 
 const emitError = (socket: Socket, payload: ErrorPayload) =>
-  socket.emit('server_error', payload);
+  socket.emit('server_error', extend(payload, { success: false }));

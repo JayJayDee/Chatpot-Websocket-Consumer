@@ -3,10 +3,12 @@ import { ConsumerModules } from './modules';
 import { ConsumerTypes } from './types';
 
 injectable(ConsumerModules.AllConsumers,
-  [ ConsumerModules.Consumers.WebsocketConsumer ],
-  async (wsConsumer): Promise<ConsumerTypes.QueueConsumer[]> =>
+  [ ConsumerModules.Consumers.WebsocketConsumer,
+    ConsumerModules.Consumers.JoinConsumer ],
+  async (wsConsumer, joinConsumer): Promise<ConsumerTypes.QueueConsumer[]> =>
     [
-      wsConsumer
+      wsConsumer,
+      joinConsumer
     ]);
 
 export { ConsumerTypes } from './types';

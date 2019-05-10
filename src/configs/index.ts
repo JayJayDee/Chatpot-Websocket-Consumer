@@ -13,8 +13,8 @@ injectable(ConfigModules.EmptyConfig, [], async (): Promise<ConfigTypes.RootConf
     password: null
   },
   topic: {
-    deviceQueue: null,
-    websocketMessageQueue: null
+    websocketMessageQueue: null,
+    websocketJoinQueue: null
   },
   websocket: {
     port: null,
@@ -44,7 +44,7 @@ injectable(ConfigModules.ConfigRules, [],
     { key: 'AMQP_PORT', path: ['amqp', 'port'] },
     { key: 'AMQP_LOGIN', path: ['amqp', 'login']  },
     { key: 'AMQP_PASSWORD', path: ['amqp', 'password'] },
-    { key: 'TOPIC_DEVICE_QUEUE', path: ['topic', 'deviceQueue'] },
+    { key: 'TOPIC_WEBSOCKET_JOIN_QUEUE', path: ['topic', 'websocketJoinQueue'] },
     { key: 'TOPIC_WEBSOCKET_MESSAGE_QUEUE', path: ['topic', 'websocketMessageQueue'] },
     { key: 'KV_STORAGE_PROVIDER', path: ['kvStorage', 'provider'], defaultValue: 'MEMORY' },
     { key: 'KV_STORAGE_REDIS_HOST', path: ['kvStorage', 'redis', 'host'], defaultValue: null },
