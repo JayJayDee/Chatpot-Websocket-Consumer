@@ -27,8 +27,8 @@ export namespace ConfigTypes {
     defaultValue?: any;
   };
   export type TopicConfig = {
-    deviceQueue: string;
     websocketMessageQueue: string;
+    websocketJoinQueue: string;
   };
   export enum WebsocketAdapter {
     MEMORY = 'MEMEORY', REDIS = 'REDIS'

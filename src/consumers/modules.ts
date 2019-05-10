@@ -3,6 +3,7 @@ export namespace ConsumerModules {
   export const ConsumerRunner = 'Consumer/ConsumerRunner';
 
   export enum Consumers {
-    WebsocketConsumer = 'Consumer/WebsocketConsumer'
+    WebsocketConsumer = 'Consumer/WebsocketConsumer',
+    JoinConsumer = 'Consumer/JoinConsumer'
   }
 }
