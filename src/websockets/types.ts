@@ -18,6 +18,9 @@ export namespace WebsocketTypes {
       }
     };
     to: (roomId: string) => IoGlobalTo;
+    sockets: {
+      sockets: {[socketId: string]: Socket};
+    }
   };
 
   export type WebsocketInstantiator = () => Promise<WebsocketWrap>;

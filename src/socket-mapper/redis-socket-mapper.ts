@@ -44,11 +44,22 @@ export default (log: LoggerTypes.Logger,
             }
           }),
 
-        async fetchSocketId(memberToken: string) {
-          return '';
-        },
-        async fetchMemberToken(socketId: string) {
-          return '';
-        }
+        fetchSocketId: (memberToken: string) =>
+          new Promise(async (resolve, reject) => {
+            const client = await getRedisClient();
+            client.get(fromTokenToSocket(memberToken), (err, socketId) => {
+              if (err) return reject(err);
+              resolve(socketId);
+            });
+          }),
+
+        fetchMemberToken: (socketId: string) =>
+          new Promise(async (resolve, reject) => {
+            const client = await getRedisClient();
+            client.get(fromSocketToToken(socketId), (err, memberToken) => {
+              if (err) return reject(err);
+              resolve(memberToken);
+            });
+          })
       };
     };

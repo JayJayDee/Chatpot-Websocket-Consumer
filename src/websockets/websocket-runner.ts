@@ -7,6 +7,7 @@ import { WebsocketTypes } from './types';
 import { NodesInspectorModules, NodesInspectorTypes } from '../nodes-inspector';
 import { Socket } from 'socket.io';
 import { ExtApiModules, ExtApiTypes } from '../extapis';
+import { SocketMapperModules, SocketMapperTypes } from '../socket-mapper';
 
 const tag = '[websocket]';
 
@@ -23,7 +24,9 @@ injectable(WebsocketModules.WebsocketRunner,
     NodesInspectorModules.ReportAlive,
     NodesInspectorModules.IncreaseConnection,
     NodesInspectorModules.DescreaseConnection,
-    ExtApiModules.RequestMyRooms ],
+    ExtApiModules.RequestMyRooms,
+    SocketMapperModules.MapSocket,
+    SocketMapperModules.UnmapSocket ],
   async (log: LoggerTypes.Logger,
     cfg: ConfigTypes.WebsocketConfig,
     hostCfg: ConfigTypes.HostConfig,
@@ -31,7 +34,9 @@ injectable(WebsocketModules.WebsocketRunner,
     reportAlive: NodesInspectorTypes.ReportAlive,
     increase: NodesInspectorTypes.IncreaseConnection,
     decrease: NodesInspectorTypes.DescreaseConnection,
-    requestMyRooms: ExtApiTypes.RequestMyRooms) =>
+    requestMyRooms: ExtApiTypes.RequestMyRooms,
+    map: SocketMapperTypes.MapSocket,
+    unmap: SocketMapperTypes.UnmapSocket) =>
 
     async () => {
       log.debug(`${tag} websocket server starting...`);
@@ -39,8 +44,8 @@ injectable(WebsocketModules.WebsocketRunner,
       await reportAlive();
 
       const onConnect = connectionHandler(log, increase, ws);
-      const onDisconnect = disconnectionHandler(log, decrease, ws);
-      const onPostInit = postInitHandler(log, requestMyRooms);
+      const onDisconnect = disconnectionHandler(log, decrease, ws, unmap);
+      const onPostInit = postInitHandler(log, requestMyRooms, map);
       const onPublish = publishHandler(log);
       const onHealth = healthHandler(log);
 
@@ -68,15 +73,22 @@ const connectionHandler =
 const disconnectionHandler =
   (log: LoggerTypes.Logger,
     decrease: NodesInspectorTypes.DescreaseConnection,
-    ws: WebsocketTypes.WebsocketWrap) =>
+    ws: WebsocketTypes.WebsocketWrap,
+    unmap: SocketMapperTypes.UnmapSocket) =>
       (socket: Socket) => {
         decrease();
+        const socketId = socket.id;
+
+        // unmap socket_id - member_token pair.
+        unmap({ socketId });
+
         log.debug(`${tag} disconnected, id=${socket.id}`);
       };
 
 const postInitHandler =
   (log: LoggerTypes.Logger,
-    getMyRooms: ExtApiTypes.RequestMyRooms) =>
+    getMyRooms: ExtApiTypes.RequestMyRooms,
+    map: SocketMapperTypes.MapSocket) =>
       async (socket: Socket, payload: any) => {
         log.debug(`${tag} init requested, id=${socket.id}`);
 
@@ -99,6 +111,10 @@ const postInitHandler =
           });
           return;
         }
+
+        // map socket_id - member_token pair
+        map(socket.id, payload.token);
+
         rooms.forEach((r) => socket.join(r));
         socket.emit('init_res', {
           success: true
