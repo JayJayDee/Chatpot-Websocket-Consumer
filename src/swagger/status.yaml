@@ -1,7 +1,7 @@
 ---
 tags:
   name: Status
-  description: Socket.IO 클러스터 상태 반환 API
+  description: Socket.IO 클러스터 상태 반환 API.
 
 /status:
   get:
