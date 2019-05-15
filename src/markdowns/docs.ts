@@ -1,6 +1,7 @@
 import { injectable } from 'smart-factory';
 import { join } from 'path';
 import { readFile } from 'fs';
+import * as markdownit from 'markdown-it';
 
 import { MarkdownModules } from './modules';
 import { MarkdownTypes } from './types';
@@ -20,11 +21,10 @@ injectable(MarkdownModules.SocketIODocs,
   [],
   async (): Promise<MarkdownTypes.SocketIODocs> =>
     () => {
+      const md = markdownit();
       return async (req, res, next) => {
         const mdContent = await readMd(mdFullPath('socket-io.md'));
-        const html = mdContent;
-
-        // TODO: convert markdown to html
+        const html = md.render(mdContent);
 
         res.set('Content-Type', 'text/html; charset=utf-8');
         res.status(200).send(html);
