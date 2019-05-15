@@ -9,6 +9,7 @@ import { ConfigModules, ConfigTypes } from '../configs';
 import { LoggerModules, LoggerTypes } from '../loggers';
 import { MiddlewareModules, MiddlewareTypes } from '../middlewares';
 import { SwaggerModules, SwaggerTypes } from '../swagger';
+import { MarkdownModules, MarkdownTypes } from '../markdowns';
 
 injectable(EndpointModules.EndpointRunner,
 
@@ -17,20 +18,23 @@ injectable(EndpointModules.EndpointRunner,
     EndpointModules.Endpoints,
     MiddlewareModules.Error,
     MiddlewareModules.NotFound,
-    SwaggerModules.SwaggerRegisterer],
+    SwaggerModules.SwaggerRegisterer,
+    MarkdownModules.SocketIODocs],
 
   async (cfg: ConfigTypes.HttpConfig,
     log: LoggerTypes.Logger,
     endpoints: EndpointTypes.Endpoint[],
     error: MiddlewareTypes.Error,
     notFound: MiddlewareTypes.NotFound,
-    swagger: SwaggerTypes.SwaggerRegisterer): Promise<EndpointTypes.EndpointRunner> =>
+    swagger: SwaggerTypes.SwaggerRegisterer,
+    socketIoDocs: MarkdownTypes.SocketIODocs): Promise<EndpointTypes.EndpointRunner> =>
 
     () => {
       const app = express();
       app.use(bodyParser.urlencoded({ extended: true }));
 
       swagger(app);
+      app.get('/socketio-doc', socketIoDocs());
 
       registerEndpoints(app, endpoints, log);
       app.use(error);

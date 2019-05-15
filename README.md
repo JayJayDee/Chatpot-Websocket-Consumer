@@ -1,5 +1,6 @@
 # Chatpot-Websocket-Consumer
-websocket server and message consumer from message queue for chatpot services.
+websocket server and message consumer from message queue for chatpot services.<br />
+[Socket.IO Protocol Guide](http://dev-websocket.chatpot.chat/socketio-doc)
 
 ## How to run
 to run the application, you need the configuration file on your home directory. the path is ```$HOME/chatpot-websocket-consumer-conf.json ```.
