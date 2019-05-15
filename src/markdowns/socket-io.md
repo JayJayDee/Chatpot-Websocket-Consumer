@@ -49,3 +49,39 @@ socket.on('postinit_res', (payload) => {
   console.log(payload); // { "success": true }
 });
 ```
+
+## SIGNAL: message
+회원이 참여하고있는 채팅방에 누군가가 (본인 포함) 메시지를 전송할 경우에 대한 이벤트를 다음과 같이 수신할 수 있다.
+```javascript
+socket.on('messasge', (payload) => {
+  console.log(payload);
+});
+```
+발송한 메시지의 payload는 다음과 같은 형태를 가진다.
+```json
+{
+   "message_id":"626446794155fd69c1b90b827b3d6931", // 메시지 ID
+   "type":"TEXT", 
+   "from":{ // 보낸 사람 정보
+      "token":"a6b365d853295c532f988916fb5413a2ab64a39c831c0292",
+      "nick":{
+         "en":"humble squid",
+         "ko":"겸손한 꼴뚜기",
+         "ja":"謙虚なるい"
+      },
+      "avatar":{
+         "profile_img":"http://dev-cdn.chatpot.chat/77975cfec23541f689e4d60d499ffd2d07e4325bbb043e4b80f803c4c515e536.png",
+         "profile_thumb":"http://dev-cdn.chatpot.chat/thumb_77975cfec23541f689e4d60d499ffd2d07e4325bbb043e4b80f803c4c515e536.jpg"
+      },
+      "region":"KR",
+      "language":"ko",
+      "gender":"M"
+   },
+   "to":{ // 발송 대상 정보
+      "type":"ROOM",
+      "token":"26ef038d7696b09ec88bd788a64fbc2e5de58333a3785c98"
+   },
+   "content":"호옹", // 메시지 컨텐츠
+   "sent_time":1557896925469 // 발송시간
+}
+```
